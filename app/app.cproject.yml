@@ -1,0 +1,90 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/tools/projmgr/2.6.0/tools/projmgr/schemas/cproject.schema.json
+project:
+  groups:
+    - group: App
+      files:
+        - file: deviceID.c
+        - file: mem_tester.c
+        - file: SERVICES_aiPM_CLI.c
+        - file: SERVICES_aiPM_print.c
+        - file: SERVICES_other.c
+    - group: Coremark
+      files:
+        - file: ../libs/coremark/core_list_join.c
+        - file: ../libs/coremark/core_main.c
+        - file: ../libs/coremark/core_matrix.c
+        - file: ../libs/coremark/core_state.c
+        - file: ../libs/coremark/core_util.c
+        - file: ../libs/coremark/barebones/core_portme.c
+        - file: ../libs/coremark/barebones/cvt.c
+    - group: Drivers
+      files:
+        - file: ../libs/drv/debug_clks.c
+        - file: ../libs/drv/debug_pwr.c
+        - file: ../libs/drv/drv_counter.c
+        - file: ../libs/drv/drv_mhu.c
+        - file: ../libs/drv/drv_pll.c
+        - file: ../libs/drv/soc_clk.c
+        - file: ../libs/drv/soc_pwr.c
+        - file: ../libs/drv/soc_rst.c
+    - group: Ethos-Common
+      files:
+        - file: ../libs/npu/kws_reference.c
+        - file: ../libs/npu/npu_u55_baremetal.c
+        - file: ../libs/npu/npu_u85_baremetal.c
+          for-context:
+            - +E8-HE
+            - +E8-HP
+    - group: Ethos-H128
+      for-context:
+        - +E1C-HE
+        - +E7-HE
+        - +E8-HE
+      files:
+        - file: ../libs/npu/kws_micronet_m_vela_H128.tflite.c
+        - file: ../libs/npu/typical_u55_memmap_H128.c
+        - file: ../libs/npu/typical_u55_reference_H128.c
+    - group: Ethos-H256
+      for-context:
+        - +E7-HP
+        - +E8-HP
+      files:
+        - file: ../libs/npu/kws_micronet_m_vela_H256.tflite.c
+        - file: ../libs/npu/typical_u55_memmap_H256.c
+        - file: ../libs/npu/typical_u55_reference_H256.c
+    - group: Ethos-Z256
+      for-context:
+        - +E8-HE
+        - +E8-HP
+      files:
+        - file: ../libs/npu/kws_micronet_m_vela_Z256.tflite.c
+        - file: ../libs/npu/typical_u85_memmap_Z256.c
+        - file: ../libs/npu/typical_u85_reference_Z256.c
+
+  add-path:
+    - .
+    - ../libs/coremark
+    - ../libs/coremark/barebones
+    - ../libs/drv
+    - ../libs/npu
+
+  output:
+    base-name: $Project$
+    type:
+      - elf
+      - bin
+
+  layers:
+    - layer: ../device/ensemble/alif-ensemble.clayer.yml
+
+  packs:
+    - pack: AlifSemiconductor::Ensemble
+    - pack: ARM::CMSIS
+    - pack: ARM::CMSIS-Compiler
+  components:
+    - component: CMSIS-Compiler:CORE
+    - component: CMSIS-Compiler:STDOUT:Custom
+    - component: Services:Retarget IO:STDOUT
+    - component: CMSIS Driver:USART
+    - component: CMSIS-Compiler:STDIN:Custom
+    - component: Services:Retarget IO:STDIN
