@@ -4,16 +4,29 @@
 
 void enable_syst_sram(uint32_t sram_select)
 {
-    volatile uint32_t *reg_ptr, reg_data;
+    volatile uint32_t *reg_ptr, reg_data, devID = DeviceID();
 
     reg_ptr = (uint32_t *) 0x1A602014;  /* CGU CLK_ENA register */
     reg_data = *reg_ptr;
 
-    /* SRAM0 clock enable is bit 24 */
-    if (sram_select & SYST_SRAM0) {
-        reg_data |= (1UL << 24);
-    } else {
-        reg_data &= ~(1UL << 24);
+    if (devID == 1) {
+        return; /* not applicable for Spark */
+    }
+    else if (devID == 2) {
+        /* SRAM0 clock enable is bit 27 */
+        if (sram_select & SYST_SRAM0) {
+            reg_data |= (1UL << 27);
+        } else {
+            reg_data &= ~(1UL << 27);
+        }
+    }
+    else {
+        /* SRAM0 clock enable is bit 24 */
+        if (sram_select & SYST_SRAM0) {
+            reg_data |= (1UL << 24);
+        } else {
+            reg_data &= ~(1UL << 24);
+        }
     }
 
     /* SRAM1 clock enable is bit 28 */
