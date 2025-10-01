@@ -203,7 +203,7 @@ void OSC_rc_to_xtal()
      * clkmon_ena[16] 0: disable 1: enable HFXO clock monitor
      * xtal_dead[20] read-only status of HFXO clock monitor
      */
-    HW_REG32(SE_CGU_OSC_CTRL, 0) = 0x11;
+    HW_REG32(SE_CGU_OSC_CTRL, 0) |= 0x11;
 
     /* ESCLK Select Register (0x10)
      * es0_pll_sel[1:0]     0: 100M PLL, 1: 200M PLL, 2: reserved, 3: 400M PLL

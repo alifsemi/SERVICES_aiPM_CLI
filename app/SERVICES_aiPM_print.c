@@ -42,18 +42,18 @@ static const char * str_cpu_clks[] = {
 };
 
 static const char * str_user_menu[] = {
-  " 1: set/get run cfg", " 2: set/get off cfg", " 3: debug clk and pwr",
-  " 4: read/write register", " 5: RTSS low power states", " 6: RTSS core exercises",
-  " 7: Boot Testing", " 8: SE Other Services", " 9: PMU AMUX config"
+  " 1: AIPM set/get run config", " 2: AIPM set/get off config", " 3: DEBUG clock and power",
+  " 4: read/write register", " 5: CPU exercises", " 6: NPU exercises",
+  " 7: SERVICES boot testing", " 8: SE Other Services", " 9: PMU AMUX config"
 };
 
 static const char * str_user_submenu[] = {
-  " 1: set_run_cfg()\r\n 2: get_run_cfg()\r\n 3: toggle systop\r\n 4: enable retention\r\n 5: disable retention\r\n 6: print ANA->PWR_CTRL status\r\n 7: memory_set()\r\n 8: memory_test()",
+  " 1: set_run_cfg()\r\n 2: get_run_cfg()",
   " 1: set_off_cfg()\r\n 2: get_off_cfg()",
   " 1: DEBUG_frequencies()\r\n 2: DEBUG_peripherals()\r\n 3: DEBUG_power()\r\n 4: Disable OSC\r\n 5: Enable OSC\r\n 6: Disable PLL\r\n 7: Enable PLL",
-  " 1: read register\r\n 2: write register\r\n 3: Enable XVCLKs\r\n 4: Toggle DCDC Mode\r\n 5: Toggle MRAM LDO\r\n 6: Force STOP Mode\r\n 7: exit",
-  " 1: M55: light sleep\r\n 2: M55: deep sleep\r\n 3: M55 subsystem off\r\n 4: NVIC_SystemReset()\r\n 5: WAKE other core via MHU",
-  " 1: U55: Typical 10s\r\n 2: U85: Typical 10s\r\n 3: U55: MicroNet Medium 100 iterations (DTCM)\r\n 4: U55: MicroNet Medium 100 iterations (SRAM)\r\n 5: U55: MicroNet Medium 100 iterations (MRAM)\r\n 6: U85: MicroNet Medium 100 iterations (SRAM)\r\n 7: U85: MicroNet Medium 100 iterations (MRAM)\r\n 8: M55: Coremark 10s\r\n 9: M55: while(1) 10s",
+  " 1: read register\r\n 2: write register\r\n 3: Enable XVCLKs\r\n 4: Toggle DCDC Mode\r\n 5: Toggle MRAM LDO\r\n 6: Toggle SYSTOP\r\n 7: Toggle DBGTOP\r\n 8: Force STOP Mode\r\n 9: exit",
+  " 1: M55: Coremark 10s\r\n 2: M55: while(1) 10s\r\n 3: M55: light sleep 10s\r\n 4: M55: deep sleep 10s\r\n 5: M55 subsystem off\r\n 6: NVIC_SystemReset()\r\n 7: WAKE other core via MHU",
+  " 1: U55: Typical 10s\r\n 2: U85: Typical 10s\r\n 3: U55: MicroNet Medium 100 iterations (DTCM)\r\n 4: U55: MicroNet Medium 100 iterations (SRAM)\r\n 5: U55: MicroNet Medium 100 iterations (MRAM)\r\n 6: U85: MicroNet Medium 100 iterations (SRAM)\r\n 7: U85: MicroNet Medium 100 iterations (MRAM)\r\n 8: U85: MicroNet Medium 100 iterations (HyperRAM)",
   " 1: boot_process_toc_entry()\r\n 2: boot_cpu()\r\n 3: boot_reset_cpu()\r\n 4: boot_release_cpu()\r\n 5: boot_reset_soc()",
   " 1: SE Clock Source to HFRC\r\n 2: SE Subsystem Off Request\r\n 3: MCU Stop Mode Request via SE"
 };

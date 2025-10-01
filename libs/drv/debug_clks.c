@@ -408,10 +408,12 @@ void DEBUG_peripherals() {
         printf("ETH_CTRL0          = 0x%08X\r\n", CLKCTL_PER_MST->ETH_CTRL0);
         printf("MRAM_CTRL/OSPI_CLK = 0x%08X\r\n", *(volatile uint32_t *)0x49041000);
     }
-    printf("M55LOCAL_CLK_ENA   = 0x%08X\r\n\n", M55LOCAL_CFG->CLK_ENA);
+    printf("\n");
+    printf("M55LOCAL_CLK_ENA   = 0x%08X\r\n", M55LOCAL_CFG->CLK_ENA);
     if (CoreID()) {
-        printf("M55HE_I2S_CTRL  = 0x%08X\r\n\n", M55HE_CFG->HE_I2S_CTRL);
+        printf("M55HE_I2S_CTRL  = 0x%08X\r\n", M55HE_CFG->HE_I2S_CTRL);
     }
+    printf("\n");
 }
 
 void DEBUG_clks_xvclks() {

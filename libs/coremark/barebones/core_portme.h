@@ -15,6 +15,9 @@ limitations under the License.
 
 Original Author: Shay Gal-on
 */
+
+#include "alif_port.h"
+
 /* Topic : Description
         This file contains configuration constants required to execute on
    different platforms
@@ -55,12 +58,8 @@ Original Author: Shay Gal-on
    function.
 */
 #ifndef HAS_PRINTF
-#define HAS_PRINTF 0
+#define HAS_PRINTF 1
 #endif
-
-#define FLAGS_STR       "-Ofast"
-#define TICKS_PER_SEC   1000
-#define ITERATIONS      1000
 
 /* Definitions : COMPILER_VERSION, COMPILER_FLAGS, MEM_LOCATION
         Initialize these strings per platform
@@ -69,7 +68,7 @@ Original Author: Shay Gal-on
 #ifdef __GNUC__
 #define COMPILER_VERSION "GCC"__VERSION__
 #else
-#error "Setup your compiler info here."
+#define COMPILER_VERSION "Please put compiler version here (e.g. gcc 4.1)"
 #endif
 #endif
 #ifndef COMPILER_FLAGS
@@ -95,7 +94,7 @@ typedef double         ee_f32;
 typedef unsigned char  ee_u8;
 typedef unsigned int   ee_u32;
 typedef ee_u32         ee_ptr_int;
-typedef unsigned int   ee_size_t;
+typedef size_t         ee_size_t;
 
 /* align_mem :
         This macro is used to align an offset to point to a 32b value. It is
@@ -181,7 +180,7 @@ typedef ee_u32 CORE_TICKS;
         1 - platform does not support returning a value from main
 */
 #ifndef MAIN_HAS_NORETURN
-#define MAIN_HAS_NORETURN 1
+#define MAIN_HAS_NORETURN 0
 #endif
 
 /* Variable : default_num_contexts

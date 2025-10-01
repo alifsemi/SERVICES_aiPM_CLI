@@ -50,17 +50,12 @@ void print_se_startup_info()
     printf("Revision: %X\t", device_info.revision_id);
     printf("LCS=%u\r\n\n", device_info.LCS);
 
-    extern int SOC_ID;
-    if (device_info.revision_id == 0xB400)
-        /* Bolt */
-        SOC_ID = 0;
-    else if (device_info.revision_id == 0xA001)
-        /* Spark */
-        SOC_ID = 1;
-    else if (device_info.revision_id == 0x02A0)
-        /* Eagle */
-        SOC_ID = 2;
-    else {
+        /* Bolt B4 */
+    if (!((device_info.revision_id == 0xB400) ||
+        /* Spark A5 */
+    (device_info.revision_id == 0xA501) ||
+        /* Eagle engr samples */
+    (device_info.revision_id == 0x02A0))) {
         /* device not supported */
         printf("Application stopping, device revision %X is not supported.\r\n\n", device_info.revision_id);
         while(1);

@@ -8,7 +8,6 @@
 #define RETAIN_1536KB   ((3U << 12)| RETAIN_1280KB)
 
 void enable_syst_sram(uint32_t sram_select);
-void disable_syst_sram(uint32_t sram_select);
 
 void enable_pd1_aon(uint32_t retention_select);
 void disable_pd1_aon();

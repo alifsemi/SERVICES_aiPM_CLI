@@ -41,11 +41,10 @@ volatile ee_s32 seed5_volatile = 0;
    cpu clock cycles performance counter etc. Sample implementation for standard
    time.h and windows.h definitions included.
 */
-extern volatile CORETIMETYPE ms_ticks;
 CORETIMETYPE
 barebones_clock()
 {
-	return ms_ticks;
+	return S32K_CNTRead->CNTCVL;
 }
 /* Define : TIMER_RES_DIVIDER
         Divider to trade off timer resolution and total time that can be
@@ -59,7 +58,7 @@ barebones_clock()
 #define MYTIMEDIFF(fin, ini)       ((fin) - (ini))
 #define TIMER_RES_DIVIDER          1
 #define SAMPLE_TIME_IMPLEMENTATION 1
-#define EE_TICKS_PER_SEC           (TICKS_PER_SEC / TIMER_RES_DIVIDER)
+#define EE_TICKS_PER_SEC           (CLOCKS_PER_SEC / TIMER_RES_DIVIDER)
 
 /** Define Host specific (POSIX), or target specific global time variables. */
 static CORETIMETYPE start_time_val, stop_time_val;
@@ -129,6 +128,9 @@ ee_u32 default_num_contexts = 1;
 void
 portable_init(core_portable *p, int *argc, char *argv[])
 {
+    (void)argc; // prevent unused warning
+    (void)argv; // prevent unused warning
+
     if (sizeof(ee_ptr_int) != sizeof(ee_u8 *))
     {
         ee_printf(
@@ -148,8 +150,4 @@ void
 portable_fini(core_portable *p)
 {
     p->portable_id = 0;
-}
-
-int ee_printf(const char *fmt, ...) {
-	return 0;
 }

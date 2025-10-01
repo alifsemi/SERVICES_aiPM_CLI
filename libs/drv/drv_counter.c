@@ -1,6 +1,4 @@
 #include <math.h>
-#include "alif.h"
-
 #include "drv_counter.h"
 #include "soc_clk.h"
 

@@ -58,14 +58,12 @@ void enable_syst_sram(uint32_t sram_select)
     *reg_ptr = reg_data;
 }
 
-void disable_syst_sram(uint32_t sram_select)
-{
-    sram_select ^= SYST_SRAM0 | SYST_SRAM1;
-    enable_syst_sram(sram_select);
-}
-
 void enable_pd1_aon(uint32_t retention_select)
 {
+    if (DeviceID() != 0) {
+        return; /* only applicable for Bolt */
+    }
+
     /* Enable PD1 */
     *((volatile uint32_t *)0x1A60A004) |= 1U;
 
@@ -88,6 +86,10 @@ void enable_pd1_aon(uint32_t retention_select)
 
 void disable_pd1_aon()
 {
+    if (DeviceID() != 0) {
+        return; /* only applicable for Bolt */
+    }
+
     /* Disable PD1 */
     *((volatile uint32_t *)0x1A60A004) &= ~1U;
 
@@ -100,6 +102,10 @@ void disable_pd1_aon()
 
 void enable_pd4_sram(uint32_t pll_sel)
 {
+    if (DeviceID() != 0) {
+        return; /* only applicable for Bolt */
+    }
+
     /* Switch PD4 between HFXO and PLL-160M clock */
     *((volatile uint32_t *)0x1A605040) = pll_sel ? 3 : 0;
     *((volatile uint32_t *)0x1A60504C) = pll_sel ? 1 : 0;
@@ -113,6 +119,10 @@ void enable_pd4_sram(uint32_t pll_sel)
 
 void disable_pd4_sram()
 {
+    if (DeviceID() != 0) {
+        return; /* only applicable for Bolt */
+    }
+
     /* Disable PD4 */
     *((volatile uint32_t *)0x1A605048) &= ~(1U << 12);
 

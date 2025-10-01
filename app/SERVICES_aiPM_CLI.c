@@ -1,11 +1,13 @@
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 
 #include <RTE_Components.h>
 #include CMSIS_device_header
 #include <se_services_port.h>
 #include <app_mem_regions.h>
+#include <board_config.h>
 #include <sys_clocks.h>
 #include <pinconf.h>
 #include <aipm.h>
@@ -37,10 +39,9 @@ extern void npuTestStartU85(uint32_t test_count, uint32_t test_select);
 #endif
 #endif
 
-#define MEMTESTER_ENABLED   1
-#if MEMTESTER_ENABLED
-extern void memory_set(const uint32_t mem_addr, uint32_t block_count, uint32_t block_size);
-extern int32_t memory_test(const uint32_t mem_addr, uint32_t block_count, uint32_t block_size);
+#define HYPERRAM_ENABLED __HAS_HYPER_RAM
+#if HYPERRAM_ENABLED
+extern int ospi_hyperram_init(void);
 #endif
 
 #include "gpio.h"
@@ -64,47 +65,26 @@ volatile uint32_t ms_ticks;
 void SysTick_Handler (void) { ms_ticks++; }
 void delay_ms(uint32_t nticks) { nticks += ms_ticks; while(ms_ticks < nticks) __WFI(); }
 
-void LPGPIO_COMB_IRQHandler()
-{
-    GPIO_Type *gpio = (GPIO_Type *) LPGPIO_BASE;
-    gpio_disable_interrupt(gpio, 4);
-    gpio_interrupt_eoi(gpio, 4);
-    NVIC_DisableIRQ(57);
-}
-
-static void lpgpio_init()
-{
-    uint32_t padctrl = PADCTRL_READ_ENABLE | PADCTRL_DRIVER_DISABLED_PULL_UP;
-    pinconf_set(PORT_LP, PIN_4, 0, padctrl);
-
-    GPIO_Type *gpio = (GPIO_Type *) LPGPIO_BASE;
-    gpio_disable_interrupt(gpio, 4);
-    gpio_interrupt_set_edge_trigger(gpio, 4);
-    gpio_interrupt_set_polarity_low(gpio, 4);
-    gpio_enable_interrupt(gpio, 4);
-    gpio_interrupt_eoi(gpio, 4);
-
-    NVIC_ClearPendingIRQ(57);
-    NVIC_EnableIRQ(57);
-}
-
 void LPTIMER1_IRQHandler()
 {
     LPTIMER_Type *lptimer = (LPTIMER_Type *) LPTIMER_BASE;
     lptimer_disable_counter(lptimer, 1);
+    lptimer_clear_interrupt(lptimer, 1);
     lptimer_clear_interrupt(lptimer, 1);
     NVIC_DisableIRQ(61);
 }
 
 static void lptimer_init()
 {
+    NVIC_DisableIRQ(61);
     uint32_t count = 327680 - 1;    // 10 seconds
 
     LPTIMER_Type *lptimer = (LPTIMER_Type *) LPTIMER_BASE;
     lptimer_disable_counter(lptimer, 1);
-    lptimer_load_count(lptimer, 1, &count);
     lptimer_set_mode_userdefined(lptimer, 1);
+    lptimer_load_count(lptimer, 1, &count);
     lptimer_enable_counter(lptimer, 1);
+    lptimer_clear_interrupt(lptimer, 1);
     lptimer_clear_interrupt(lptimer, 1);
 
     NVIC_ClearPendingIRQ(61);
@@ -250,14 +230,6 @@ void main (void)
             SERVICES_response(service_response);
         }
 
-        ret = SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
-        if (ret != 0) {
-            SERVICES_ret(ret);
-        }
-        if (service_response != 0) {
-            SERVICES_response(service_response);
-        }
-
         SysTick_Config(CoreClockUpdate()/TICKS_PER_SECOND);
         reconfigure_uart();
         refclk_cntr_update();
@@ -281,8 +253,8 @@ void main (void)
         offp.stby_clk_src = CLK_SRC_HFRC;
         offp.stby_clk_freq = SCALED_FREQ_RC_STDBY_0_6_MHZ;
 #if defined(M55_HE)
-        offp.wakeup_events = WE_LPTIMER1 | WE_LPGPIO4;
-        offp.ewic_cfg = EWIC_VBAT_TIMER1 | EWIC_VBAT_GPIO4;
+        offp.wakeup_events = WE_LPTIMER1;
+        offp.ewic_cfg = EWIC_VBAT_TIMER1;
 #endif
         offp.aon_clk_src = CLK_SRC_LFXO;
         offp.vdd_ioflex_3V3 = IOFLEX_LEVEL_1V8;
@@ -386,39 +358,6 @@ void main (void)
                 }
                 break;
 
-            case 3:
-                HOSTBASE->BSYS_PWR_REQ ^= 0x20;
-                break;
-
-            case 4:
-                /* enable SRAM0 and SRAM1 retention */
-                VBAT->RET_CTRL = 0xF0;
-                break;
-
-            case 5:
-                /* disable SRAM0 and SRAM1 retention */
-                VBAT->RET_CTRL = 0x3FFF0;
-                break;
-
-            case 6:
-                printf("ANA->PWR_CTRL: 0x%08X\r\n\n", ANA->RESERVED);
-                break;
-#if SOC_FEAT_HAS_BULK_SRAM
-            case 7:
-                memory_set(APP_SRAM0_BASE, 64, 64 * 1024);
-                memory_set(APP_SRAM1_BASE, 64, 64 * 1024);
-                printf("\n");
-                break;
-
-            case 8:
-                memory_test(APP_SRAM0_BASE, 64, 64 * 1024);
-                memory_test(APP_SRAM1_BASE, 64, 64 * 1024);
-                printf("\n");
-                break;
-#endif
-            case 9:
-                break;
-
             default:
                 break;
             }
@@ -520,10 +459,13 @@ void main (void)
             default:
                 break;
             }
+            SysTick_Config(CoreClockUpdate()/TICKS_PER_SECOND);
+            reconfigure_uart();
+            refclk_cntr_update();
             break;
 
         case 4:
-            while(user_subchoice != 7) {
+            while(user_subchoice != 9) {
                 switch(user_subchoice)
                 {
                 case 1:
@@ -547,8 +489,15 @@ void main (void)
                     break;
 
                 case 6:
+                    HOSTBASE->BSYS_PWR_REQ ^= 0x20;
+                    break;
+
+                case 7:
+                    HOSTBASE->BSYS_PWR_REQ ^= 0x04;
+                    break;
+
+                case 8:
 #if defined(M55_HE)
-                lpgpio_init();
                 lptimer_init();
                 ANA->WKUP_CTRL = WE_LPTIMER1;
 #endif
@@ -556,8 +505,7 @@ void main (void)
     pinconf_set(PRINTF_UART_CONSOLE_TX_PORT_NUM,  PRINTF_UART_CONSOLE_TX_PIN, 0, 0);     /* set TX_PIN as input */
 #endif
                     /* this pulls the plug, there is no coming back from this */
-                    STOP_MODE->VBAT_STOP_MODE_REG = 1U;
-                    while(1);
+                    STOP_MODE->VBAT_STOP_MODE_REG = 1U; __DSB(); __ISB();
                     break;
 
                 default:
@@ -572,12 +520,27 @@ void main (void)
             switch(user_subchoice)
             {
             case 1:
-                delay_ms(10000);
+#if COREMARK_ENABLED == 1
+                /* ten seconds of Coremark */
+                seed4_volatile = roundf(0.00003 * SystemCoreClock);
+                coremark_main();
+#endif
                 break;
 
             case 2:
+                /* ten seconds of while(1) */
+                uint32_t nticks = ms_ticks + (10 * TICKS_PER_SECOND);
+                while(ms_ticks < nticks);
+                break;
+
+            case 3:
+                /* ten seconds of light sleep */
+                delay_ms(10000);
+                break;
+
+            case 4:
+                /* ten seconds of deep sleep */
 #if defined(M55_HE)
-                lpgpio_init();
                 lptimer_init();
 #endif
                 __disable_irq();
@@ -585,12 +548,13 @@ void main (void)
                 __enable_irq();
                 break;
 
-            case 3:
+            case 5:
+                /* M55-HE: ten seconds of subsystem off 
+                 * M55-HP: subsystem stays off until woken by MHU */
 #if defined(M55_HE)
-                lpgpio_init();
                 lptimer_init();
 #endif
-#if defined(RTE_CMSIS_Compiler_STDOUT_Custom)
+#if defined(RTE_CMSIS_Compiler_STDOUT_Custom) && (PRINTF_UART_CONSOLE == LP)
     pinconf_set(PRINTF_UART_CONSOLE_TX_PORT_NUM,  PRINTF_UART_CONSOLE_TX_PIN, 0, 0);     /* set TX_PIN as input */
 #endif
                 __disable_irq();
@@ -603,11 +567,11 @@ void main (void)
 #endif
                 break;
 
-            case 4:
+            case 6:
                 NVIC_SystemReset();
                 break;
 
-            case 5:
+            case 7:
                 MHU_SENDER_Set(RTSS_TX_MHU0_BASE, 0, 0x1234);
                 break;
 
@@ -617,9 +581,9 @@ void main (void)
             break;
 
         case 6:
+#if ETHOS_ENABLED == 1
             switch(user_subchoice)
             {
-#if ETHOS_ENABLED
             case 1:
                 /* ten seconds of Ethos "Typical" Test Case */
 #if defined(M55_HP)
@@ -675,25 +639,21 @@ void main (void)
                 printf("Feature not implemented on this device\r\n\n");
 #endif
                 break;
-#endif
 
-#if COREMARK_ENABLED
             case 8:
-                /* ten seconds of Coremark */
-                seed4_volatile = roundf(0.000032 * SystemCoreClock);
-                coremark_main();
-                break;
+#if defined(ENSEMBLE_SOC_GEN2)
+                /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in HyperRAM */
+                ospi_hyperram_init();
+                npuTestStartU85(100, 3);
+#else
+                printf("Feature not implemented on this device\r\n\n");
 #endif
-
-            case 9:
-                /* ten seconds of while(1) */
-                uint32_t nticks = ms_ticks + (10 * TICKS_PER_SECOND);
-                while(ms_ticks < nticks);
                 break;
 
             default:
                 break;
             }
+#endif
             break;
 
         case 7:
@@ -730,7 +690,6 @@ void main (void)
 
             case 3:
 #if defined(M55_HE)
-                lpgpio_init();
                 lptimer_init();
 #endif
 #if defined(RTE_CMSIS_Compiler_STDOUT_Custom)

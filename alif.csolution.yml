@@ -12,7 +12,8 @@ solution:
 
   packs:
     - pack: AlifSemiconductor::Ensemble@2.0.2
-    - pack: ARM::CMSIS@6.0.0
+    - pack: ARM::CMSIS-Compiler@^2.0.0
+    - pack: ARM::CMSIS
 
   target-types:
     - type: E7-HE
@@ -62,7 +63,7 @@ solution:
         - _DEBUG
     - type: release
       optimize: speed
-      debug: off
+      debug: on
 
   define:
     - UNICODE

@@ -1,0 +1,9 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/tools/projmgr/2.6.0/tools/projmgr/schemas/clayer.schema.json
+
+layer:
+  components:
+    - component: Device:SOC Peripherals:GPIO
+    - component: BSP:OSPI HYPERRAM XIP
+    - component: Device:SOC Peripherals:OSPI
+  packs:
+    - pack: AlifSemiconductor::Ensemble@^2.0.2

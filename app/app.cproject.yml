@@ -5,6 +5,10 @@ project:
       files:
         - file: deviceID.c
         - file: mem_tester.c
+        - file: ospi_hyperram.c
+          for-context:
+            - +E8-HE
+            - +E8-HP
         - file: SERVICES_aiPM_CLI.c
         - file: SERVICES_aiPM_print.c
         - file: SERVICES_other.c
@@ -76,11 +80,15 @@ project:
 
   layers:
     - layer: ../device/ensemble/alif-ensemble.clayer.yml
+    - layer: ../device/ensemble/alif-hyperram.clayer.yml
+      for-context:
+        - +E8-HE
+        - +E8-HP
 
   packs:
-    - pack: AlifSemiconductor::Ensemble
     - pack: ARM::CMSIS
-    - pack: ARM::CMSIS-Compiler
+    - pack: ARM::CMSIS-Compiler@^2.0.0
+    - pack: AlifSemiconductor::Ensemble@^2.0.2
   components:
     - component: CMSIS-Compiler:CORE
     - component: CMSIS-Compiler:STDOUT:Custom

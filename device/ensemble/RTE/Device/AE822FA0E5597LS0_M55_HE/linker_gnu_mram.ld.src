@@ -48,6 +48,9 @@ MEMORY
   SRAM0 (rwx) : ORIGIN = APP_SRAM0_BASE, LENGTH = APP_SRAM0_SIZE
   SRAM1 (rwx) : ORIGIN = APP_SRAM1_BASE, LENGTH = APP_SRAM1_SIZE
   #endif
+  #if __HAS_HYPER_RAM
+  HRAM  (rwx) : ORIGIN = APP_HRAM_HE_BASE, LENGTH = APP_HRAM_HE_SIZE
+  #endif
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
 }
 
@@ -61,8 +64,8 @@ SECTIONS
 
     *startup*(.text .rodata*)
     *system*(.text .rodata*)
-    *mpu*(.text .rodata*)
     *tgu*(.text .rodata*)
+    *mpu*(.text .rodata*)
     *sau_tcm_ns_setup*(.text .rodata*)
 
     *lv_*(.text .rodata*)
@@ -100,10 +103,6 @@ SECTIONS
 
   .code.at_itcm : ALIGN(8)
   {
-    *(.text*)
-    *(.kws_reference)
-    *(.typical_reference)
-  
     . = ALIGN(16);
   } > ITCM AT > MRAM
 
@@ -117,12 +116,6 @@ SECTIONS
 
     KEEP(*(.jcr*))
 
-    . = ALIGN(8);
-    *(.ARM.extab* .gnu.linkonce.armextab.*)
-    . = ALIGN(8);
-    __exidx_start = .;
-    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    __exidx_end = .;
     . = ALIGN(16);
   } > DTCM AT > MRAM
 
@@ -144,6 +137,13 @@ SECTIONS
   {
     * (.bss.kws_model_sram)
   } > SRAM1
+  #endif
+
+  #if __HAS_HYPER_RAM
+  .bss.hram_noinit (NOLOAD) : ALIGN(8)
+  {
+    * (.bss.kws_model_hram)
+  } > HRAM
   #endif
 
   .bss.itcm_noinit (NOLOAD) : ALIGN(8)
@@ -226,10 +226,22 @@ SECTIONS
     *(SORT(.dtors.*))
     *(.dtors)
 
+    . = ALIGN(8);
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+    . = ALIGN(8);
+    __exidx_start = .;
+    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    __exidx_end = .;
+
+    *(.text*)
     *(.rodata*)
-    *(.kws_model)
+
     *(.typical_u85_mem_map)
     *(.typical_u85_reference)
+
+    *(.kws_model)
+    *(.kws_reference)
+    *(.typical_reference)
 
     KEEP(*(.eh_frame*))
     . = ALIGN(16);

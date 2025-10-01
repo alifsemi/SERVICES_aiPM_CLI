@@ -3535,7 +3535,7 @@
 //    <1=> CLK_100MHz
 // <i> Defines UART4 clock source.
 // <i> Default: CLK_100MHz
-#define RTE_UART4_CLK_SOURCE   0
+#define RTE_UART4_CLK_SOURCE   1
 
 #define RTE_UART4_RS485_ENABLE 0
 #if RTE_UART4_RS485_ENABLE
