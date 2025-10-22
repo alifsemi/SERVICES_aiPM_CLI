@@ -61,9 +61,9 @@ extern int ospi_hyperram_init(void);
 #include "SERVICES_other.h"
 
 #define TICKS_PER_SECOND        1000
-volatile uint32_t ms_ticks;
+volatile uint32_t ms_ticks, nticks;
 void SysTick_Handler (void) { ms_ticks++; }
-void delay_ms(uint32_t nticks) { nticks += ms_ticks; while(ms_ticks < nticks) __WFI(); }
+void delay_ms(uint32_t msec) { msec += ms_ticks; while(ms_ticks < msec) __WFI(); }
 
 void LPTIMER1_IRQHandler()
 {
@@ -162,7 +162,7 @@ static void reconfigure_uart()
 #endif
 }
 
-void main (void)
+int main (void)
 {
     s32k_cntr_init();
     refclk_cntr_init();
@@ -211,8 +211,7 @@ void main (void)
     printf("aiPM Run Config Settings at Application Start:\r\n");
     print_run_cfg(&runp);
 
-    /* weird stuff happening when aiPM is used on Eagle */
-    if ((wakeup_event == 0) && (DeviceID() != 2)) {
+    if (wakeup_event == 0) {
         runp.dcdc_voltage = 775;
         runp.power_domains = PD6_MASK;// | PD8_MASK;// | PD4_MASK | PD1_MASK;
         runp.memory_blocks = MRAM_MASK | BACKUP4K_MASK;
@@ -230,6 +229,7 @@ void main (void)
             SERVICES_response(service_response);
         }
 
+        CLKCTL_SYS->BSYS_PWR_REQ = 0;
         SysTick_Config(CoreClockUpdate()/TICKS_PER_SECOND);
         reconfigure_uart();
         refclk_cntr_update();
@@ -522,20 +522,21 @@ void main (void)
             case 1:
 #if COREMARK_ENABLED == 1
                 /* ten seconds of Coremark */
-                seed4_volatile = roundf(0.00003 * SystemCoreClock);
+                seed4_volatile = roundf(0.000031 * SystemCoreClock);
                 coremark_main();
 #endif
                 break;
 
             case 2:
                 /* ten seconds of while(1) */
-                uint32_t nticks = ms_ticks + (10 * TICKS_PER_SECOND);
+                nticks = ms_ticks + (10 * TICKS_PER_SECOND);
                 while(ms_ticks < nticks);
                 break;
 
             case 3:
                 /* ten seconds of light sleep */
-                delay_ms(10000);
+                nticks = ms_ticks + (10 * TICKS_PER_SECOND);
+                while(ms_ticks < nticks) __WFI();
                 break;
 
             case 4:
@@ -624,6 +625,16 @@ void main (void)
 
             case 6:
 #if defined(ENSEMBLE_SOC_GEN2)
+                /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in HRAM */
+                ospi_hyperram_init();
+                npuTestStartU55(100, 4);
+#else
+                printf("Feature not implemented on this device\r\n\n");
+#endif
+                break;
+
+            case 7:
+#if defined(ENSEMBLE_SOC_GEN2)
                 /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in SRAM */
                 npuTestStartU85(100, 1);
 #else
@@ -631,7 +642,7 @@ void main (void)
 #endif
                 break;
 
-            case 7:
+            case 8:
 #if defined(ENSEMBLE_SOC_GEN2)
                 /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in MRAM */
                 npuTestStartU85(100, 2);
@@ -640,7 +651,7 @@ void main (void)
 #endif
                 break;
 
-            case 8:
+            case 9:
 #if defined(ENSEMBLE_SOC_GEN2)
                 /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in HyperRAM */
                 ospi_hyperram_init();
@@ -723,4 +734,5 @@ void main (void)
             break;
         }
     }
+    return 0;
 }

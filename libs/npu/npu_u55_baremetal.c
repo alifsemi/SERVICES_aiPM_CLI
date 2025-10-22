@@ -34,6 +34,9 @@ static const uint8_t kws_model_tcm[157600] __attribute__((aligned(16), section("
 #if SOC_FEAT_HAS_BULK_SRAM
 static const uint8_t kws_model_sram[157600] __attribute__((aligned(16), section(".bss.kws_model_sram")));
 #endif
+#if __HAS_HYPER_RAM
+static const uint8_t kws_model_hram[157600] __attribute__((aligned(16), section(".bss.kws_model_hram")));
+#endif
 #endif
 
 #define NPU_BASE_ADDRESS                NPULOCAL_BASE
@@ -121,15 +124,22 @@ static int32_t set_global_attributes(void)
                 npu_readonly_addr = kws_model_tcm;
                 break;
 
-#if SOC_FEAT_HAS_BULK_SRAM
             case 2:
+#if SOC_FEAT_HAS_BULK_SRAM
                 memcpy((void *) kws_model_sram, model_data_addr, model_data_size);
                 npu_readonly_addr = kws_model_sram;
-                break;
 #endif
+                break;
 
             case 3:
                 npu_readonly_addr = model_data_addr;
+                break;
+
+            case 4:
+#if __HAS_HYPER_RAM
+                memcpy((void *) kws_model_hram, model_data_addr, model_data_size);
+                npu_readonly_addr = kws_model_hram;
+#endif
                 break;
 
             default:
