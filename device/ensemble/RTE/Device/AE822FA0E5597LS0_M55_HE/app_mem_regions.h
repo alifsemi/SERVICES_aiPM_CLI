@@ -42,15 +42,15 @@
 //   <o> RTSS HE Region size [bytes] <0x0-0x04000000:8>
 //   <i> Defines size of RTSS HE application memory region.
 //   <i> Default: 0x02000000
-#define APP_HRAM_HE_SIZE       0x02000000
+#define APP_HRAM_HE_SIZE       0x04000000
 //   <o> RTSS HP Base address <0xA0000000-0xA3FFFFFF:8>
 //   <i> Defines base address of RTSS HP application memory region.
 //   <i> Default: 0xA2000000
-#define APP_HRAM_HP_BASE       0xA2000000
+#define APP_HRAM_HP_BASE       0xA0000000
 //   <o> RTSS HP Region size [bytes] <0x0-0x04000000:8>
 //   <i> Defines size of RTSS HP application memory region.
 //   <i> Default: 0x02000000
-#define APP_HRAM_HP_SIZE       0x02000000
+#define APP_HRAM_HP_SIZE       0x04000000
 // </h>
 
 // <h>RAM Configuration

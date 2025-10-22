@@ -64,8 +64,8 @@ SECTIONS
 
     *startup*(.text .rodata*)
     *system*(.text .rodata*)
-    *tgu*(.text .rodata*)
     *mpu*(.text .rodata*)
+    *tgu*(.text .rodata*)
     *sau_tcm_ns_setup*(.text .rodata*)
 
     *lv_*(.text .rodata*)
@@ -115,7 +115,6 @@ SECTIONS
     *arm_common_tables*(.data* .rodata*)
 
     KEEP(*(.jcr*))
-
     . = ALIGN(16);
   } > DTCM AT > MRAM
 
@@ -177,6 +176,7 @@ SECTIONS
     __HeapLimit = .;
   } > DTCM
 
+  /* .stack (NOLOAD) : ALIGN(8) */
   .stack (ORIGIN(DTCM) + LENGTH(DTCM) - __STACK_SIZE) (NOLOAD) : ALIGN(8)
   {
     __StackLimit = .;
@@ -236,12 +236,11 @@ SECTIONS
     *(.text*)
     *(.rodata*)
 
-    *(.typical_u85_mem_map)
-    *(.typical_u85_reference)
-
     *(.kws_model)
     *(.kws_reference)
     *(.typical_reference)
+    *(.typical_u85_mem_map)
+    *(.typical_u85_reference)
 
     KEEP(*(.eh_frame*))
     . = ALIGN(16);
