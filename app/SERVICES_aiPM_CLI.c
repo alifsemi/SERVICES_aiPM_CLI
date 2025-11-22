@@ -147,6 +147,7 @@ static int32_t print_wakeup_source()
 #define UART_BASE(n)        _UART_BASE_(n)
 #define _UART_CLK_SRC_(n)   RTE_UART##n##_CLK_SOURCE
 #define UART_CLK_SRC(n)     _UART_CLK_SRC_(n)
+/* run this function every time the clock source for UART is changed */
 static void reconfigure_uart()
 {
 #if defined(RTE_CMSIS_Compiler_STDIN_Custom) || defined(RTE_CMSIS_Compiler_STDOUT_Custom)
@@ -213,7 +214,7 @@ int main (void)
 
     if (wakeup_event == 0) {
         runp.dcdc_voltage = 775;
-        runp.power_domains = PD6_MASK;// | PD8_MASK;// | PD4_MASK | PD1_MASK;
+        runp.power_domains = PD6_MASK;// | PD8_MASK;
         runp.memory_blocks = MRAM_MASK | BACKUP4K_MASK;
 #if SOC_FEAT_HAS_BULK_SRAM
         runp.memory_blocks |= SRAM0_MASK | SRAM1_MASK;
@@ -229,10 +230,10 @@ int main (void)
             SERVICES_response(service_response);
         }
 
-        CLKCTL_SYS->BSYS_PWR_REQ = 0;
         SysTick_Config(CoreClockUpdate()/TICKS_PER_SECOND);
         reconfigure_uart();
         refclk_cntr_update();
+        HOSTBASE->BSYS_PWR_REQ = 0;
 
         ret = SERVICES_get_off_cfg(se_services_s_handle, &offp, &service_response);
         if (ret != 0) {
@@ -248,7 +249,7 @@ int main (void)
         offp.memory_blocks |= SRAM4_1_MASK | SRAM4_2_MASK | SRAM5_1_MASK | SRAM5_2_MASK;
 #endif
 #if defined(M55_HE_E1C)
-        offp.memory_blocks |= SRAM4_3_MASK | SRAM4_4_MASK | SRAM5_3_MASK | SRAM5_4_MASK | SRAM5_5_MASK;
+        offp.memory_blocks |= SRAM4_4_MASK | SRAM5_5_MASK;
 #endif
         offp.stby_clk_src = CLK_SRC_HFRC;
         offp.stby_clk_freq = SCALED_FREQ_RC_STDBY_0_6_MHZ;

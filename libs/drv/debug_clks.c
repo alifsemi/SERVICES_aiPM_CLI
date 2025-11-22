@@ -66,10 +66,10 @@ void DEBUG_frequencies() {
     printf("[x] means clock is selected\r\n\n");
 
     reg_data = AON->RESERVED2[3];  // MISC_REG1
-    if (DeviceID() == 1)
-        hfxo_div = (reg_data >> 17) & 15U;
-    else
+    if (DeviceID() == 0)
         hfxo_div = (reg_data >> 13) & 15U;
+    else
+        hfxo_div = (reg_data >> 17) & 15U;
 
     if (hfxo_div > 7) {
         hfxo_div -= 8;
