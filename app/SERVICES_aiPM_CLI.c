@@ -326,7 +326,8 @@ int main (void)
                             SERVICES_response(service_response);
                         }
 
-                        ret = SERVICES_get_run_cfg(se_services_s_handle, &runp, &service_response);
+                        run_profile_t tmp_runp = {0};
+                        ret = SERVICES_get_run_cfg(se_services_s_handle, &tmp_runp, &service_response);
                         if (ret != 0) {
                             SERVICES_ret(ret);
                         }
@@ -335,7 +336,7 @@ int main (void)
                         }
                         else {
                             printf("aiPM Run Config after Configuration:\r\n");
-                            print_run_cfg(&runp);
+                            print_run_cfg(&tmp_runp);
                         }
                         break;
                     } else {
@@ -359,9 +360,52 @@ int main (void)
                 }
                 break;
 
+            case 3:
+                runp.power_domains |= PD6_MASK;
+                SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
+                break;
+
+            case 4:
+                runp.power_domains &= ~PD6_MASK;
+                SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
+                break;
+
+            case 5:
+                runp.power_domains |= PD8_MASK;
+                SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
+                break;
+
+            case 6:
+                runp.power_domains &= ~PD8_MASK;
+                SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
+                break;
+
+            case 7:
+                runp.run_clk_src = CLK_SRC_PLL;
+#if defined(M55_HE)
+                runp.cpu_clk_freq = CLOCK_FREQUENCY_160MHZ;
+#else
+                runp.cpu_clk_freq = CLOCK_FREQUENCY_400MHZ;
+#endif
+                SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
+                SysTick_Config(CoreClockUpdate()/TICKS_PER_SECOND);
+                reconfigure_uart();
+                refclk_cntr_update();
+                break;
+
+            case 8:
+                runp.run_clk_src = CLK_SRC_HFRC;
+                runp.cpu_clk_freq = CLOCK_FREQUENCY_76_8_RC_MHZ;
+                SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
+                SysTick_Config(CoreClockUpdate()/TICKS_PER_SECOND);
+                reconfigure_uart();
+                refclk_cntr_update();
+                break;
+
             default:
                 break;
             }
+
             break;
 
         case 2:
@@ -387,7 +431,8 @@ int main (void)
                             SERVICES_response(service_response);
                         }
 
-                        ret = SERVICES_get_off_cfg(se_services_s_handle, &offp, &service_response);
+                        off_profile_t tmp_offp = {0};
+                        ret = SERVICES_get_off_cfg(se_services_s_handle, &tmp_offp, &service_response);
                         if (ret != 0) {
                             SERVICES_ret(ret);
                         }
@@ -396,7 +441,7 @@ int main (void)
                         }
                         else {
                             printf("aiPM Off Config after Configuration:\r\n");
-                            print_off_cfg(&offp);
+                            print_off_cfg(&tmp_offp);
                         }
                         break;
                     }
@@ -513,7 +558,7 @@ int main (void)
                     break;
                 }
                 user_subchoice = print_user_submenu(user_choice);
-                if (user_subchoice == 7) break;
+                if (user_subchoice == 9) break;
             }
             break;
 

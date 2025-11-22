@@ -48,7 +48,7 @@ static const char * str_user_menu[] = {
 };
 
 static const char * str_user_submenu[] = {
-  " 1: set_run_cfg()\r\n 2: get_run_cfg()",
+  " 1: set_run_cfg()\r\n 2: get_run_cfg()\r\n 3: set_run_cfg(): turn on PD6 SYSTOP\r\n 4: set_run_cfg(): turn off PD6 SYSTOP\r\n 5: set_run_cfg(): turn on PD8 DBGTOP\r\n 6: set_run_cfg(): turn on PD8 DBGTOP\r\n 7: set_run_cfg(): switch to PLL\r\n 8: set_run_cfg(): switch to HFRC",
   " 1: set_off_cfg()\r\n 2: get_off_cfg()",
   " 1: DEBUG_frequencies()\r\n 2: DEBUG_peripherals()\r\n 3: DEBUG_power()\r\n 4: Disable OSC\r\n 5: Enable OSC\r\n 6: Disable PLL\r\n 7: Enable PLL",
   " 1: read register\r\n 2: write register\r\n 3: Enable XVCLKs\r\n 4: Toggle DCDC Mode\r\n 5: Toggle MRAM LDO\r\n 6: Toggle SYSTOP\r\n 7: Toggle DBGTOP\r\n 8: Force STOP Mode\r\n 9: exit",
