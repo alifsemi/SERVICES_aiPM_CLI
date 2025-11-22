@@ -37,7 +37,7 @@
             "command": [
                 "cpackget init https://www.keil.com/pack/index.pidx;",
                 "cpackget add https://github.com/ARM-software/CMSIS_6/releases/download/v6.0.0/ARM.CMSIS.6.0.0.pack;",
-                "cpackget add https://github.com/alifsemi/alif_ensemble-cmsis-dfp/releases/download/v2.0.2/AlifSemiconductor.Ensemble.2.0.2.pack;",
+                "cpackget add https://github.com/alifsemi/alif_ensemble-cmsis-dfp/releases/download/v2.0.4/AlifSemiconductor.Ensemble.2.0.4.pack;",
                 "cpackget list;",
                 "echo 'Pack installation has been completed'"
             ],
@@ -49,14 +49,16 @@
             "command": [
                     "outputElfFilename='${command:cmsis-csolution.getBinaryFile}';",
                     "cp \"${outputElfFilename/%???/bin}\" '${config:alif.setools.root}/build/images/alif-img.bin';",
-                    "cp './.alif/${command:cmsis-csolution.getProcessorName}_cfg.json' '${config:alif.setools.root}/alif-img.json';"
+                    "cp './.alif/${command:cmsis-csolution.getProcessorName}_cfg.json' '${config:alif.setools.root}/alif-img.json';",
+                    "cp './.alif/app-device-config-no-hfxo.json' '${config:alif.setools.root}/build/config/app-device-config-no-hfxo.json';"
                 ],
             "windows": {
                 "command": [
                     "$outputElfFilename='${command:cmsis-csolution.getBinaryFile}';",
                     "$outputBinFilename=${outputElfFilename}.Substring(0, $outputElfFilename.Length -3) + 'bin';",
                     "cp \"$outputBinFilename\" '${config:alif.setools.root}/build/images/alif-img.bin';",
-                    "cp './.alif/${command:cmsis-csolution.getProcessorName}_cfg.json' '${config:alif.setools.root}/alif-img.json';"
+                    "cp './.alif/${command:cmsis-csolution.getProcessorName}_cfg.json' '${config:alif.setools.root}/alif-img.json';",
+                    "cp './.alif/app-device-config-no-hfxo.json' '${config:alif.setools.root}/build/config/app-device-config-no-hfxo.json';"
                 ]
             },
             "problemMatcher": []
