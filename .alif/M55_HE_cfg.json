@@ -2,7 +2,6 @@
   "DEVICE": {
     "disabled" : false,
     "binary": "app-device-config.json",
-    // "binary": "app-device-config-no-hfxo.json",
     "version" : "1.0.0",
     "signed": false
   },
