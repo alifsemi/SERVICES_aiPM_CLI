@@ -198,8 +198,8 @@ int main (void)
 
     print_se_startup_info();
 
-    run_profile_t runp = {0};
-    off_profile_t offp = {0};
+    run_profile_t runp = {0}, tmp_runp = {0};
+    off_profile_t offp = {0}, tmp_offp = {0};
     ret = SERVICES_get_run_cfg(se_services_s_handle, &runp, &service_response);
     if (ret != 0) {
         SERVICES_ret(ret);
@@ -269,7 +269,7 @@ int main (void)
             SERVICES_response(service_response);
         }
 
-        ret = SERVICES_get_run_cfg(se_services_s_handle, &runp, &service_response);
+        ret = SERVICES_get_run_cfg(se_services_s_handle, &tmp_runp, &service_response);
         if (ret != 0) {
             SERVICES_ret(ret);
         }
@@ -277,7 +277,7 @@ int main (void)
             SERVICES_response(service_response);
         }
 
-        ret = SERVICES_get_off_cfg(se_services_s_handle, &offp, &service_response);
+        ret = SERVICES_get_off_cfg(se_services_s_handle, &tmp_offp, &service_response);
         if (ret != 0) {
             SERVICES_ret(ret);
         }
@@ -287,9 +287,9 @@ int main (void)
 
         /* print the run config and off config after this application has made changes */
         printf("aiPM Run Config after Configuration:\r\n");
-        print_run_cfg(&runp);
+        print_run_cfg(&tmp_runp);
         printf("aiPM Off Config after Configuration:\r\n");
-        print_off_cfg(&offp);
+        print_off_cfg(&tmp_offp);
     }
 
     int32_t user_choice, user_subchoice, cfg_choice, cfg_param;
@@ -326,7 +326,6 @@ int main (void)
                             SERVICES_response(service_response);
                         }
 
-                        run_profile_t tmp_runp = {0};
                         ret = SERVICES_get_run_cfg(se_services_s_handle, &tmp_runp, &service_response);
                         if (ret != 0) {
                             SERVICES_ret(ret);
@@ -348,7 +347,7 @@ int main (void)
                 break;
 
             case 2:
-                ret = SERVICES_get_run_cfg(se_services_s_handle, &runp, &service_response);
+                ret = SERVICES_get_run_cfg(se_services_s_handle, &tmp_runp, &service_response);
                 if (ret != 0) {
                     SERVICES_ret(ret);
                 }
@@ -356,7 +355,7 @@ int main (void)
                     SERVICES_response(service_response);
                 }
                 else {
-                    print_run_cfg(&runp);
+                    print_run_cfg(&tmp_runp);
                 }
                 break;
 
@@ -371,16 +370,11 @@ int main (void)
                 break;
 
             case 5:
-                runp.power_domains |= PD8_MASK;
-                SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
-                break;
-
-            case 6:
                 runp.power_domains &= ~PD8_MASK;
                 SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
                 break;
 
-            case 7:
+            case 6:
                 runp.run_clk_src = CLK_SRC_PLL;
 #if defined(M55_HE)
                 runp.cpu_clk_freq = CLOCK_FREQUENCY_160MHZ;
@@ -393,13 +387,23 @@ int main (void)
                 refclk_cntr_update();
                 break;
 
-            case 8:
+            case 7:
                 runp.run_clk_src = CLK_SRC_HFRC;
                 runp.cpu_clk_freq = CLOCK_FREQUENCY_76_8_RC_MHZ;
                 SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
                 SysTick_Config(CoreClockUpdate()/TICKS_PER_SECOND);
                 reconfigure_uart();
                 refclk_cntr_update();
+                break;
+
+            case 8:
+                runp.dcdc_mode = DCDC_MODE_PWM;
+                SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
+                break;
+
+            case 9:
+                runp.dcdc_mode = DCDC_MODE_PFM_FORCED;
+                SERVICES_set_run_cfg(se_services_s_handle, &runp, &service_response);
                 break;
 
             default:
@@ -431,7 +435,6 @@ int main (void)
                             SERVICES_response(service_response);
                         }
 
-                        off_profile_t tmp_offp = {0};
                         ret = SERVICES_get_off_cfg(se_services_s_handle, &tmp_offp, &service_response);
                         if (ret != 0) {
                             SERVICES_ret(ret);
@@ -454,7 +457,7 @@ int main (void)
                 break;
 
             case 2:
-                ret = SERVICES_get_off_cfg(se_services_s_handle, &offp, &service_response);
+                ret = SERVICES_get_off_cfg(se_services_s_handle, &tmp_offp, &service_response);
                 if (ret != 0) {
                     SERVICES_ret(ret);
                 }
@@ -462,7 +465,7 @@ int main (void)
                     SERVICES_response(service_response);
                 }
                 else {
-                    print_off_cfg(&offp);
+                    print_off_cfg(&tmp_offp);
                 }
                 break;
 
@@ -570,6 +573,7 @@ int main (void)
                 /* ten seconds of Coremark */
                 seed4_volatile = roundf(0.000031 * SystemCoreClock);
                 coremark_main();
+                printf("\r\n");
 #endif
                 break;
 
@@ -754,17 +758,16 @@ int main (void)
 #endif
                 ret = SERVICES_power_stop_mode_req(se_services_s_handle, OFF_PROFILE, 0);
                 delay_ms(5);
+#if defined(RTE_CMSIS_Compiler_STDOUT_Custom)
+    pinconf_set(PRINTF_UART_CONSOLE_TX_PORT_NUM,  PRINTF_UART_CONSOLE_TX_PIN, \
+            PRINTF_UART_CONSOLE_TX_PINMUX_FUNCTION, PRINTF_UART_CONSOLE_TX_PADCTRL);  /* restore TX_PIN state */
+#endif
                 if (ret != 0) {
                     SERVICES_ret(ret);
                 }
                 if (service_response != 0) {
                     SERVICES_response(service_response);
                 }
-
-#if defined(RTE_CMSIS_Compiler_STDOUT_Custom)
-    pinconf_set(PRINTF_UART_CONSOLE_TX_PORT_NUM,  PRINTF_UART_CONSOLE_TX_PIN, \
-            PRINTF_UART_CONSOLE_TX_PINMUX_FUNCTION, PRINTF_UART_CONSOLE_TX_PADCTRL);  /* restore TX_PIN state */
-#endif
                 break;
 
             default:
