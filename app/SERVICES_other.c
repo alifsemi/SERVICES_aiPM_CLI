@@ -46,7 +46,7 @@ void print_se_startup_info()
         SERVICES_response(service_response);
     }
 
-    printf("ALIF_PN: %s\t", device_info.ALIF_PN);
+    printf("ALIF_PN: %.16s\t", device_info.ALIF_PN);
     printf("Revision: %X\t", device_info.revision_id);
     printf("LCS=%u\r\n\n", device_info.LCS);
 
