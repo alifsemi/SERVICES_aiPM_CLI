@@ -72,6 +72,9 @@ project:
     - ../libs/drv
     - ../libs/npu
 
+  linker:
+    - script: "../device/ensemble/RTE/Device/$Dname$_$Pname$/linker_gnu_mram.ld.src"
+
   output:
     base-name: $Project$
     type:
