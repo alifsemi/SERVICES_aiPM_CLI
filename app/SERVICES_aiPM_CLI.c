@@ -216,9 +216,6 @@ int main (void)
         runp.dcdc_voltage = 775;
         runp.power_domains = PD6_MASK;// | PD8_MASK;
         runp.memory_blocks = MRAM_MASK | BACKUP4K_MASK;
-#if SOC_FEAT_HAS_BULK_SRAM
-        runp.memory_blocks |= SRAM0_MASK | SRAM1_MASK;
-#endif
         runp.vdd_ioflex_3V3 = IOFLEX_LEVEL_1V8;
         runp.scaled_clk_freq = SCALED_FREQ_RC_STDBY_0_6_MHZ;
 
@@ -235,13 +232,13 @@ int main (void)
         refclk_cntr_update();
         HOSTBASE->BSYS_PWR_REQ = 0;
 
-        ret = SERVICES_get_off_cfg(se_services_s_handle, &offp, &service_response);
-        if (ret != 0) {
-            SERVICES_ret(ret);
-        }
-        if (service_response != 0) {
-            SERVICES_response(service_response);
-        }
+        // ret = SERVICES_get_off_cfg(se_services_s_handle, &offp, &service_response);
+        // if (ret != 0) {
+        //     SERVICES_ret(ret);
+        // }
+        // if (service_response != 0) {
+        //     SERVICES_response(service_response);
+        // }
 
         /* setting some memories to retain by default */
         offp.memory_blocks = MRAM_MASK | SERAM_MASK | BACKUP4K_MASK;
@@ -261,13 +258,13 @@ int main (void)
         offp.vdd_ioflex_3V3 = IOFLEX_LEVEL_1V8;
         offp.vtor_address = SCB->VTOR;
 
-        ret = SERVICES_set_off_cfg(se_services_s_handle, &offp, &service_response);
-        if (ret != 0) {
-            SERVICES_ret(ret);
-        }
-        if (service_response != 0) {
-            SERVICES_response(service_response);
-        }
+        // ret = SERVICES_set_off_cfg(se_services_s_handle, &offp, &service_response);
+        // if (ret != 0) {
+        //     SERVICES_ret(ret);
+        // }
+        // if (service_response != 0) {
+        //     SERVICES_response(service_response);
+        // }
 
         ret = SERVICES_get_run_cfg(se_services_s_handle, &tmp_runp, &service_response);
         if (ret != 0) {
@@ -277,19 +274,19 @@ int main (void)
             SERVICES_response(service_response);
         }
 
-        ret = SERVICES_get_off_cfg(se_services_s_handle, &tmp_offp, &service_response);
-        if (ret != 0) {
-            SERVICES_ret(ret);
-        }
-        if (service_response != 0) {
-            SERVICES_response(service_response);
-        }
+        // ret = SERVICES_get_off_cfg(se_services_s_handle, &tmp_offp, &service_response);
+        // if (ret != 0) {
+        //     SERVICES_ret(ret);
+        // }
+        // if (service_response != 0) {
+        //     SERVICES_response(service_response);
+        // }
 
-        /* print the run config and off config after this application has made changes */
+        // /* print the run config and off config after this application has made changes */
         printf("aiPM Run Config after Configuration:\r\n");
         print_run_cfg(&tmp_runp);
-        printf("aiPM Off Config after Configuration:\r\n");
-        print_off_cfg(&tmp_offp);
+        // printf("aiPM Off Config after Configuration:\r\n");
+        // print_off_cfg(&tmp_offp);
     }
 
     int32_t user_choice, user_subchoice, cfg_choice, cfg_param;
@@ -467,6 +464,10 @@ int main (void)
                 else {
                     print_off_cfg(&tmp_offp);
                 }
+                break;
+
+            case 3:
+                ospi_hyperram_init();
                 break;
 
             default:
@@ -662,7 +663,9 @@ int main (void)
             case 4:
 #if SOC_FEAT_HAS_BULK_SRAM
                 /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in SRAM */
+                enable_syst_sram(SYST_SRAM1);
                 npuTestStartU55(100, 2);
+                enable_syst_sram(0);
 #else
                 printf("Feature not implemented on this device\r\n\n");
 #endif
@@ -686,7 +689,9 @@ int main (void)
             case 7:
 #if defined(ENSEMBLE_SOC_GEN2)
                 /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in SRAM */
+                enable_syst_sram(SYST_SRAM0 | SYST_SRAM1);
                 npuTestStartU85(100, 1);
+                enable_syst_sram(0);
 #else
                 printf("Feature not implemented on this device\r\n\n");
 #endif
@@ -695,7 +700,9 @@ int main (void)
             case 8:
 #if defined(ENSEMBLE_SOC_GEN2)
                 /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in MRAM */
+                enable_syst_sram(SYST_SRAM0);
                 npuTestStartU85(100, 2);
+                enable_syst_sram(0);
 #else
                 printf("Feature not implemented on this device\r\n\n");
 #endif
@@ -704,8 +711,10 @@ int main (void)
             case 9:
 #if defined(ENSEMBLE_SOC_GEN2)
                 /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in HyperRAM */
+                enable_syst_sram(SYST_SRAM0);
                 ospi_hyperram_init();
                 npuTestStartU85(100, 3);
+                enable_syst_sram(0);
 #else
                 printf("Feature not implemented on this device\r\n\n");
 #endif
