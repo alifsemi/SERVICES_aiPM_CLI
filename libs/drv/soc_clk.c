@@ -153,7 +153,7 @@ uint32_t SystBusClkUpdate()
         SystemAXIClock = SystRefclkUpdate();
     }
     else if (aclk_status == 2) {
-        SystemAXIClock = SystSyspllUpdate();
+        SystemAXIClock = SystSyspllUpdate() / ((HOSTBASE->ACLK_DIV0 >> 16) + 1);
     }
 
     if (DeviceID() == 0) {
