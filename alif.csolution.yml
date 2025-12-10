@@ -62,7 +62,7 @@ solution:
       define:
         - _DEBUG
     - type: release
-      optimize: speed
+      optimize: size
       debug: on
 
   define:

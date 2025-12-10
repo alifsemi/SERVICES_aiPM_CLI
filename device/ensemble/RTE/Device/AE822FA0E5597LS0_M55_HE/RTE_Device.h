@@ -3404,7 +3404,7 @@
 // <h> UART (Universal asynchronous receiver transmitter)
 // <e> UART0 (Universal asynchronous receiver transmitter) [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::Drivers:USART
-#define RTE_UART0 1
+#define RTE_UART0 0
 
 #if RTE_UART0
 
@@ -3463,7 +3463,7 @@
 
 // <e> UART1 (Universal asynchronous receiver transmitter) [Driver_USART1]
 // <i> Configuration settings for Driver_USART1 in component ::Drivers:USART
-#define RTE_UART1 1
+#define RTE_UART1 0
 
 #if RTE_UART1
 
@@ -3522,7 +3522,7 @@
 
 // <e> UART2 (Universal asynchronous receiver transmitter) [Driver_USART2]
 // <i> Configuration settings for Driver_USART2 in component ::Drivers:USART
-#define RTE_UART2 1
+#define RTE_UART2 0
 
 #if RTE_UART2
 
@@ -3581,7 +3581,7 @@
 
 // <e> UART3 (Universal asynchronous receiver transmitter) [Driver_USART3]
 // <i> Configuration settings for Driver_USART3 in component ::Drivers:USART
-#define RTE_UART3 1
+#define RTE_UART3 0
 
 #if RTE_UART3
 
@@ -3640,7 +3640,7 @@
 
 // <e> UART4 (Universal asynchronous receiver transmitter) [Driver_USART4]
 // <i> Configuration settings for Driver_USART4 in component ::Drivers:USART
-#define RTE_UART4 1
+#define RTE_UART4 0
 
 #if RTE_UART4
 
@@ -3715,7 +3715,7 @@
 
 // <e> UART5 (Universal asynchronous receiver transmitter) [Driver_USART5]
 // <i> Configuration settings for Driver_USART5 in component ::Drivers:USART
-#define RTE_UART5 1
+#define RTE_UART5 0
 
 #if RTE_UART5
 
@@ -3790,7 +3790,7 @@
 
 // <e> UART6 (Universal asynchronous receiver transmitter) [Driver_USART6]
 // <i> Configuration settings for Driver_USART6 in component ::Drivers:USART
-#define RTE_UART6 1
+#define RTE_UART6 0
 
 #if RTE_UART6
 
@@ -3865,7 +3865,7 @@
 
 // <e> UART7 (Universal asynchronous receiver transmitter) [Driver_USART7]
 // <i> Configuration settings for Driver_USART7 in component ::Drivers:USART
-#define RTE_UART7 1
+#define RTE_UART7 0
 
 #if RTE_UART7
 
@@ -9353,7 +9353,7 @@
 // <h> GPIO (general purpose input and output)
 // <e> GPIO0
 // <i> Configuration settings for Driver_GPIO0 in component ::Drivers:GPIO
-#define RTE_GPIO0 1
+#define RTE_GPIO0 0
 
 #if RTE_GPIO0
 
@@ -9413,7 +9413,7 @@
 
 // <e> GPIO1
 // <i> Configuration settings for Driver_GPIO1 in component ::Drivers:GPIO
-#define RTE_GPIO1 1
+#define RTE_GPIO1 0
 
 #if RTE_GPIO1
 
@@ -9473,7 +9473,7 @@
 
 // <e> GPIO2
 // <i> Configuration settings for Driver_GPIO2 in component ::Drivers:GPIO
-#define RTE_GPIO2 1
+#define RTE_GPIO2 0
 
 #if RTE_GPIO2
 
@@ -9533,7 +9533,7 @@
 
 // <e> GPIO3
 // <i> Configuration settings for Driver_GPIO3 in component ::Drivers:GPIO
-#define RTE_GPIO3 1
+#define RTE_GPIO3 0
 
 #if RTE_GPIO3
 
@@ -9649,7 +9649,7 @@
 
 // <e> GPIO4
 // <i> Configuration settings for Driver_GPIO4 in component ::Drivers:GPIO
-#define RTE_GPIO4 1
+#define RTE_GPIO4 0
 
 #if RTE_GPIO4
 
@@ -9766,7 +9766,7 @@
 
 // <e> GPIO5
 // <i> Configuration settings for Driver_GPIO5 in component ::Drivers:GPIO
-#define RTE_GPIO5 1
+#define RTE_GPIO5 0
 
 #if RTE_GPIO5
 
@@ -9826,7 +9826,7 @@
 
 // <e> GPIO6
 // <i> Configuration settings for Driver_GPIO6 in component ::Drivers:GPIO
-#define RTE_GPIO6 1
+#define RTE_GPIO6 0
 
 #if RTE_GPIO6
 
@@ -9886,7 +9886,7 @@
 
 // <e> GPIO7
 // <i> Configuration settings for Driver_GPIO7 in component ::Drivers:GPIO
-#define RTE_GPIO7 1
+#define RTE_GPIO7 0
 
 #if RTE_GPIO7
 
@@ -10002,7 +10002,7 @@
 
 // <e> GPIO8
 // <i> Configuration settings for Driver_GPIO8 in component ::Drivers:GPIO
-#define RTE_GPIO8 1
+#define RTE_GPIO8 0
 
 #if RTE_GPIO8
 
@@ -10118,7 +10118,7 @@
 
 // <e> GPIO9
 // <i> Configuration settings for Driver_GPIO9 in component ::Drivers:GPIO
-#define RTE_GPIO9 1
+#define RTE_GPIO9 0
 
 #if RTE_GPIO9
 
@@ -10234,7 +10234,7 @@
 
 // <e> GPIO10
 // <i> Configuration settings for Driver_GPIO10 in component ::Drivers:GPIO
-#define RTE_GPIO10 1
+#define RTE_GPIO10 0
 
 #if RTE_GPIO10
 
@@ -10294,7 +10294,7 @@
 
 // <e> GPIO11
 // <i> Configuration settings for Driver_GPIO11 in component ::Drivers:GPIO
-#define RTE_GPIO11 1
+#define RTE_GPIO11 0
 
 #if RTE_GPIO11
 
@@ -10354,7 +10354,7 @@
 
 // <e> GPIO12
 // <i> Configuration settings for Driver_GPIO12 in component ::Drivers:GPIO
-#define RTE_GPIO12 1
+#define RTE_GPIO12 0
 
 #if RTE_GPIO12
 
@@ -10414,7 +10414,7 @@
 
 // <e> GPIO13
 // <i> Configuration settings for Driver_GPIO13 in component ::Drivers:GPIO
-#define RTE_GPIO13 1
+#define RTE_GPIO13 0
 
 #if RTE_GPIO13
 
@@ -10474,7 +10474,7 @@
 
 // <e> GPIO14
 // <i> Configuration settings for Driver_GPIO14 in component ::Drivers:GPIO
-#define RTE_GPIO14 1
+#define RTE_GPIO14 0
 
 #if RTE_GPIO14
 
@@ -10534,7 +10534,7 @@
 
 // <e> GPIO16
 // <i> Configuration settings for Driver_GPIO16 in component ::Drivers:GPIO
-#define RTE_GPIO16 1
+#define RTE_GPIO16 0
 
 #if RTE_GPIO16
 
@@ -10554,7 +10554,7 @@
 
 // <e> GPIO17
 // <i> Configuration settings for Driver_GPIO17 in component ::Drivers:GPIO
-#define RTE_GPIO17 1
+#define RTE_GPIO17 0
 #if RTE_GPIO17
 
 // <o> GPIO17 Bit Manipulation Feature

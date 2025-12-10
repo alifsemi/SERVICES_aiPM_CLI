@@ -103,6 +103,17 @@ SECTIONS
 
   .code.at_itcm : ALIGN(8)
   {
+    *(.text*)
+    *SERVICES_aiPM*(.rodata*)
+    *SERVICES_other*(.rodata*)
+
+    . = ALIGN(8);
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+    . = ALIGN(8);
+    __exidx_start = .;
+    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    __exidx_end = .;
+
     . = ALIGN(16);
   } > ITCM AT > MRAM
 
@@ -226,14 +237,6 @@ SECTIONS
     *(SORT(.dtors.*))
     *(.dtors)
 
-    . = ALIGN(8);
-    *(.ARM.extab* .gnu.linkonce.armextab.*)
-    . = ALIGN(8);
-    __exidx_start = .;
-    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    __exidx_end = .;
-
-    *(.text*)
     *(.rodata*)
 
     *(.kws_model)
