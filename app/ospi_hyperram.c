@@ -26,8 +26,10 @@
 #include "alif.h"
 #include "pinconf.h"
 #include "sys_utils.h"
+#include "drv_counter.h"
 #include "ospi_hyperram.h"
 #include "ospi_hyperram_xip.h"
+#include "sys_ctrl_aes.h"
 #include "Driver_IO.h"
 
 #define OSPI_RESET_PORT                15
@@ -47,6 +49,7 @@ static ARM_DRIVER_GPIO *GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
 #define SLAVE_SELECT    0
 #define WAIT_CYCLES     6
 
+static uint32_t init_done;
 static const ospi_hyperram_xip_config issi_config = {
     .instance       = OSPI_INSTANCE_0,
     .bus_speed      = OSPI_BUS_SPEED,
@@ -208,13 +211,45 @@ static int32_t hyperram_reset(void)
     return 0;
 }
 
+int ospi_hyperram_deinit(void)
+{
+    int32_t ret;
+    OSPI_Type *ospi          = NULL;
+    AES_Type  *aes           = NULL;
+
+    /* Setup the OSPI/AES register map pointers based on the OSPI instance */
+    if (issi_config.instance == OSPI_INSTANCE_0) {
+        ospi = (OSPI_Type *) OSPI0_BASE;
+        aes  = (AES_Type *) AES0_BASE;
+    }
+#ifdef RTE_OSPI1
+    else {
+        ospi = (OSPI_Type *) OSPI1_BASE;
+        aes  = (AES_Type *) AES1_BASE;
+    }
+#endif
+
+    init_done = 0;
+
+    aes_disable_xip(aes);
+#if SOC_FEAT_OSPI_HAS_CLK_ENABLE
+    disable_ospi_clk(issi_config.instance);
+#endif
+
+    ret = GPIODrv->SetValue(OSPI_RESET_PIN, GPIO_PIN_OUTPUT_STATE_LOW);
+    if (ret != ARM_DRIVER_OK) {
+        return -1;
+    }
+
+    return 0;
+}
+
 int ospi_hyperram_init(void)
 {
-    uint32_t static init_done = 0;
     if (init_done == 0) {
         issi_pinmux_setup();
         hyperram_reset();
-        if (ospi_hyperram_xip_init(&issi_config) < 0)
+        if (ospi_hyperram_xip_init(&issi_config))
         {
             printf("OSPI HyperRAM init failed\n\n");
             return -1;
@@ -227,28 +262,35 @@ int ospi_hyperram_init(void)
     uint32_t *const ptr          = (uint32_t *) OSPI_XIP_BASE;
     uint32_t        total_errors = 0, random_val;
 
-    printf("Writing data to the XIP region...\n");
+    printf("Writing data to the XIP region...\r\n");
+    uint64_t elapsed_time = s32k_cntr_val64();
 
-    srand(1);
+    random_val = 1;
     for (uint32_t i = 0; i < (HRAM_SIZE_BYTES / sizeof(uint32_t)); i++) {
-        ptr[i] = rand();
+        ptr[i] = random_val++;
     }
 
-    printf("Done. Reading back and verifying...\n");
+    elapsed_time = s32k_cntr_val64() - elapsed_time;
+    printf("Writing took %"PRIu32" millisec\r\n", (uint32_t)(elapsed_time * 0.0305));
+    printf("Done. Reading back and verifying...\r\n");
 
-    srand(1);
+    elapsed_time = s32k_cntr_val64();
+
+    random_val = 1;
     for (uint32_t i = 0; i < (HRAM_SIZE_BYTES / sizeof(uint32_t)); i++) {
-        random_val = rand();
         if (ptr[i] != random_val) {
-            printf("Data error at addr %" PRIx32 ", got %" PRIx32 ", expected %" PRIx32 "\n",
+            printf("Data error at addr %" PRIx32 ", got %" PRIx32 ", expected %" PRIx32 "\r\n",
                    (i * sizeof(uint32_t)),
                    ptr[i],
                    random_val);
             total_errors++;
         }
+        random_val++;
     }
 
-    printf("Verification done, total errors = %" PRIu32 "\n\n", total_errors);
+    elapsed_time = s32k_cntr_val64() - elapsed_time;
+    printf("Reading took %"PRIu32" millisec\r\n", (uint32_t)(elapsed_time * 0.0305));
+    printf("Verification done, total errors = %"PRIu32"\r\n\n", total_errors);
 #endif
     return 0;
 }

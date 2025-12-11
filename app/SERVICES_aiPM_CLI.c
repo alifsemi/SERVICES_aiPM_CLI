@@ -42,6 +42,7 @@ extern void npuTestStartU85(uint32_t test_count, uint32_t test_select);
 #define HYPERRAM_ENABLED __HAS_HYPER_RAM
 #if HYPERRAM_ENABLED
 extern int ospi_hyperram_init(void);
+extern int ospi_hyperram_deinit(void);
 #endif
 
 #include "gpio.h"
@@ -468,6 +469,8 @@ int main (void)
 
             case 3:
                 ospi_hyperram_init();
+                delay_ms(100);
+                ospi_hyperram_deinit();
                 break;
 
             default:
@@ -681,6 +684,7 @@ int main (void)
                 /* 100 iterations of Ethos KWS (MicroNet Medium) Test Case, Model in HRAM */
                 ospi_hyperram_init();
                 npuTestStartU55(100, 4);
+                ospi_hyperram_deinit();
 #else
                 printf("Feature not implemented on this device\r\n\n");
 #endif
@@ -714,6 +718,7 @@ int main (void)
                 enable_syst_sram(SYST_SRAM0);
                 ospi_hyperram_init();
                 npuTestStartU85(100, 3);
+                ospi_hyperram_deinit();
                 enable_syst_sram(0);
 #else
                 printf("Feature not implemented on this device\r\n\n");
