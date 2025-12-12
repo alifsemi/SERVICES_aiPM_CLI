@@ -375,14 +375,35 @@ void DEBUG_frequencies() {
         printf("PD4_CLK%14dHz%s\r\n", pd4_clk, reg_data > 1 ? gated[1] : gated[0]);
     }
 
-    printf("160M_CLK%13dHz%s\r\n", 160000000, gated[(clk_ena >> 20) & 1U]);
-    if (DeviceID() == 0)
+    if (DeviceID() == 2) {
+        printf(" 10M_CLK%13dHz%s\r\n",  10000000, gated[(clk_ena >> 9) & 1U]);
+        printf(" 20M_CLK%13dHz%s\r\n",  20000000, gated[(clk_ena >> 22) & 1U]);
+        printf(" 25M_CLK%13dHz%s\r\n",  25000000, gated[(clk_ena >> 5) & 1U]);
+        printf(" 50M_CLK%13dHz%s\r\n",  50000000, gated[(clk_ena >> 6) & 1U]);
+        printf(" 80M_CLK%13dHz%s\r\n",  80000000, gated[(clk_ena >> 10) & 1U]);
+        printf("100M_CLK%13dHz%s\r\n", 100000000, gated[(clk_ena >> 7) & 1U]);
+        printf("160M_CLK%13dHz%s\r\n", 160000000, gated[(clk_ena >> 20) & 1U]);
+        printf("200M_CLK%13dHz%s\r\n", 200000000, gated[(clk_ena >> 14) & 1U]);
+        printf("266M_CLK%13dHz%s\r\n", 266000000, gated[(clk_ena >> 21) & 1U]);
+        printf("400M_CLK%13dHz%s\r\n", 400000000, gated[(clk_ena >> 15) & 1U]);
+        printf("38.4M_CLK%12dHz%s\r\n", 38400000, gated[(clk_ena >> 23) & 1U]);
+        printf("76.8M_CLK%12dHz%s\r\n", 76800000, gated[(clk_ena >> 24) & 1U]);
+        printf("MRAM_CLK%13dHz%s\r\n", syst_aclk/6, gated[(clk_ena >> 11) & 1U]);
+        printf("ISP_CLK %13dHz%s\r\n", syst_aclk, gated[(clk_ena >> 29) & 1U]);
+        printf("JPEG_CLK%13dHz%s\r\n", syst_aclk, gated[(clk_ena >> 30) & 1U]);
+        printf("U85_CLK %13dHz%s\r\n", syst_aclk, gated[(clk_ena >> 31) & 1U]);
+    }
+    else {
+        printf("10M/20M_CLK%10dHz%s\r\n", 20000000, gated[(clk_ena >> 22) & 1U]);
         printf("100M_CLK%13dHz%s\r\n", 100000000, gated[(clk_ena >> 21) & 1U]);
-    printf("20M/10M_CLK%10dHz%s\r\n", 20000000, gated[(clk_ena >> 22) & 1U]);
+        printf("160M_CLK%13dHz%s\r\n", 160000000, gated[(clk_ena >> 20) & 1U]);
+        printf("38.4M_CLK%12dHz%s\r\n", 38400000, gated[(clk_ena >> 23) & 1U]);
+    }
     printf("* means clock is gated\r\n\n");
 }
 
 void DEBUG_peripherals() {
+    /* CLKCTL_PER_SLV */
     printf("EXPMST0_CTRL       = 0x%08X\r\n", CLKCTL_PER_SLV->EXPMST0_CTRL);
     printf("UART_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->UART_CTRL);
     printf("CANFD_CTRL         = 0x%08X\r\n", CLKCTL_PER_SLV->CANFD_CTRL);
@@ -397,21 +418,42 @@ void DEBUG_peripherals() {
     printf("ADC_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->ADC_CTRL);
     printf("DAC_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->DAC_CTRL);
     printf("CMP_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->CMP_CTRL);
-    printf("CAMERA_PIXCLK_CTRL = 0x%08X\r\n", CLKCTL_PER_MST->CAMERA_PIXCLK_CTRL);
+#if SOC_FEAT_OSPI_HAS_CLK_ENABLE
+    printf("OSPI_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->OSPI_CTRL);
+#endif
+    if (DeviceID() != 0) {
+        printf("I2C0_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C0_CTRL);
+        printf("I2C1_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C1_CTRL);
+    }
+    if (DeviceID() == 2) {
+        printf("I2C2_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C2_CTRL);
+        printf("I2C3_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C3_CTRL);
+    }
+
+    /* CLKCTL_PER_MST */
     if (DeviceID() != 1) {
-        printf("CDC200_PIXCLK_CTRL = 0x%08X\r\n", CLKCTL_PER_MST->CDC200_PIXCLK_CTRL);
+        printf("CAMERA_PIXCLK_CTRL = 0x%08X\r\n", CLKCTL_PER_MST->CAMERA_PIXCLK_CTRL);
         printf("CSI_PIXCLK_CTRL    = 0x%08X\r\n", CLKCTL_PER_MST->CSI_PIXCLK_CTRL);
     }
+    printf("CDC200_PIXCLK_CTRL = 0x%08X\r\n", CLKCTL_PER_MST->CDC200_PIXCLK_CTRL);
     printf("PERIPH_CLK_ENA     = 0x%08X\r\n", CLKCTL_PER_MST->PERIPH_CLK_ENA);
     printf("MIPI_CKEN          = 0x%08X\r\n", CLKCTL_PER_MST->MIPI_CKEN);
     if (DeviceID() != 1) {
         printf("ETH_CTRL0          = 0x%08X\r\n", CLKCTL_PER_MST->ETH_CTRL0);
+    }
+    if (DeviceID() == 0) {
         printf("MRAM_CTRL/OSPI_CLK = 0x%08X\r\n", *(volatile uint32_t *)0x49041000);
     }
     printf("\n");
+
+    /* M55LOCAL_CFG */
     printf("M55LOCAL_CLK_ENA   = 0x%08X\r\n", M55LOCAL_CFG->CLK_ENA);
     if (CoreID()) {
-        printf("M55HE_I2S_CTRL  = 0x%08X\r\n", M55HE_CFG->HE_I2S_CTRL);
+        printf("M55HE_LPI2S_CTRL   = 0x%08X\r\n", M55HE_CFG->HE_I2S_CTRL);
+        if(DeviceID() == 2) {
+            printf("M55HE_LPI3C_CTRL   = 0x%08X\r\n", M55HE_CFG->HE_I3C_CTRL);
+        }
+        printf("M55HE_LPCAM_PIXCLK = 0x%08X\r\n", M55HE_CFG->HE_CAMERA_PIXCLK);
     }
     printf("\n");
 }
