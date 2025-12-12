@@ -1,4 +1,5 @@
 #include "deviceID.h"
+#include "sys_utils.h"
 #include "soc_pwr.h"
 #include "alif.h"
 
@@ -56,6 +57,10 @@ void enable_syst_sram(uint32_t sram_select)
     }
 
     *reg_ptr = reg_data;
+
+    if (sram_select) {
+        sys_busy_loop_us(60);
+    }
 }
 
 void enable_pd1_aon(uint32_t retention_select)
