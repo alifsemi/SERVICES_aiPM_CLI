@@ -6,6 +6,7 @@
 
 void reset_external_system0(uint32_t vtor_address)
 {
+#if !defined(ENSEMBLE_SOC_E1C)
     *((volatile uint32_t *)0x1A604000) = 0;
     *((volatile uint32_t *)0x1A605014) = vtor_address;
 
@@ -17,6 +18,7 @@ void reset_external_system0(uint32_t vtor_address)
 
     /* release reset, but keep M55 CPUWAIT */
     HOSTBASE->EXT_SYS0_RST_CTRL = 1;
+#endif
 }
 
 void reset_external_system1(uint32_t vtor_address)
@@ -36,10 +38,12 @@ void reset_external_system1(uint32_t vtor_address)
 
 void release_external_system0()
 {
+#if !defined(ENSEMBLE_SOC_E1C)
     HOSTBASE->EXT_SYS0_RST_CTRL = 0;
 
     /* dummy read to force clocks to start */
     (void) *((volatile uint32_t *) APP_SRAM2_BASE);
+#endif
 }
 
 void release_external_system1()

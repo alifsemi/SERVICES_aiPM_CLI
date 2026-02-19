@@ -467,9 +467,11 @@ int main (void)
                 break;
 
             case 3:
+#if defined(ENSEMBLE_SOC_GEN2)
                 ospi_hyperram_init();
                 delay_ms(100);
                 ospi_hyperram_deinit();
+#endif
                 break;
 
             default:
