@@ -3,7 +3,6 @@ project:
   groups:
     - group: App
       files:
-        - file: deviceID.c
         - file: mem_tester.c
         - file: ospi_hyperram.c
           for-context:

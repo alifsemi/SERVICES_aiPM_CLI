@@ -48,7 +48,6 @@ extern int ospi_hyperram_deinit(void);
 #include "gpio.h"
 #include "lptimer.h"
 
-#include "deviceID.h"
 #include "debug_clks.h"
 #include "debug_pwr.h"
 #include "drv_counter.h"

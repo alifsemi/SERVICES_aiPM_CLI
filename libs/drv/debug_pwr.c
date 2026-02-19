@@ -3,7 +3,6 @@
 #include <cmsis_compiler.h>
 #include "alif.h"
 
-#include "deviceID.h"
 #include "debug_pwr.h"
 
 void DEBUG_power() {
@@ -16,9 +15,9 @@ void DEBUG_power() {
     printf("PD1=%u\r\n",                  (reg_data & 1U));
     printf("PD2=AON_STBY\r\n");
     printf("PD3=%u\r\n",                  (*((volatile uint32_t *)0x1A601008) & 15U) > 0 ? 1 : 0); // PPU-HE
-    if (DeviceID() == 0) {
-        printf("PD4=%u\r\n",                  (*((volatile uint32_t *)0x1A605058) & 0xFFFU) > 1 ? 1 : 0);
-    }
+#if !(defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C))
+    printf("PD4=%u\r\n",                  (*((volatile uint32_t *)0x1A605058) & 0xFFFU) > 1 ? 1 : 0);
+#endif
     printf("SRAM0=%u\r\n",                (reg_data >> 8) & 1U ? 0 : 1);
     printf("SRAM1=%u\r\n",                (reg_data >> 12) & 1U ? 0 : 1);
     reg_data = (reg_data >> 16) & 3U;
@@ -40,22 +39,28 @@ void DEBUG_power() {
     printf("M55_HE VTOR=0x%08X\r\n\n", reg_data);
 
     /* retention settings & stop mode wakeup source enables */
-    printf("RET Settings:\r\n");
+    printf("RETENTON Settings:\r\n");
     reg_data = *((volatile uint32_t *)0x1A60A038);   // VBAT_ANA_REG1
     printf("RET LDO VOUT=%d\r\n",               (reg_data >> 4) & 15U);
     printf("RET LDO VBAT_EN=%u MAIN_EN=%u\r\n", (reg_data >> 8) & 1U, (reg_data >> 10) & 1U);
-    if (DeviceID() == 1) {
-        reg_data = *((volatile uint32_t *)0x1A60900C);   // VBATALL RET_CTRL
-        printf("BK RAM=0x%X HE TCM=0x%X BLE MEM=0x%X\r\n", (reg_data & 1U), (reg_data >> 1) & 63U, (reg_data >> 7) & 15U);
-        reg_data = *((volatile uint32_t *)0x1A60A018);   // VBATSEC RET_CTRL
-        printf("FW RAM=0x%X SE RAM=0x%X\r\n",   (reg_data & 1U), (reg_data >> 4) & 15U);
-    }
-    else {
-        reg_data = *((volatile uint32_t *)0x1A60900C);   // VBATALL RET_CTRL
-        printf("BK RAM=0x%X HE TCM=0x%X\r\n",   (reg_data & 3U), (reg_data >> 4) & 15U);
-        reg_data = *((volatile uint32_t *)0x1A60A018);   // VBATSEC RET_CTRL
-        printf("FW RAM=0x%X SE RAM=0x%X\r\n",   (reg_data & 3U), (reg_data >> 4) & 3U);
-    }
+#if defined(ENSEMBLE_SOC_E1C)
+    reg_data = *((volatile uint32_t *)0x1A60900C);   // VBATALL RET_CTRL
+    printf("BK RAM=0x%X HE TCM=0x%X BLE MEM=0x%X\r\n", (reg_data & 1U), (reg_data >> 1) & 63U, (reg_data >> 7) & 15U);
+    reg_data = *((volatile uint32_t *)0x1A60A018);   // VBATSEC RET_CTRL
+    printf("FW RAM=0x%X SE RAM=0x%X\r\n",   (reg_data & 1U), (reg_data >> 4) & 15U);
+#else
+    reg_data = *((volatile uint32_t *)0x1A60900C);   // VBATALL RET_CTRL
+#if defined(ENSEMBLE_SOC_GEN2)
+    reg_data |= 0xFFFFFFFFUL;
+    *((volatile uint32_t *)0x1A60900C) = reg_data;
+    printf("SRAM0=0x%02X SRAM1=0x%02X\r\n",   (reg_data >> 8) & 255U, (reg_data >> 16) & 3U);
+#endif
+    printf("BK RAM=0x%X HE TCM=0x%X\r\n",   (reg_data & 3U), (reg_data >> 4) & 15U);
+    reg_data = *((volatile uint32_t *)0x1A60A018);   // VBATSEC RET_CTRL
+    reg_data |= 0xFFFFFFFFUL;
+    *((volatile uint32_t *)0x1A60900C) = reg_data;
+    printf("FW RAM=0x%X SE RAM=0x%X\r\n",   (reg_data & 3U), (reg_data >> 4) & 3U);
+#endif
     printf("VBAT_WKUP=0x%08X\r\n\n",       *((volatile uint32_t *)0x1A60A008));// VBATSEC WKUP_CTRL
 
     printf("PHY Power:\r\n");
@@ -71,30 +76,30 @@ void DEBUG_power() {
     printf("DIG LDO VOUT=%u EN=%u\r\n",   (reg_data >> 6) & 15U, (reg_data >> 5) & 1U);
     printf("Bandgap PMU=%u\r\n",          (reg_data >> 1) & 15U);
     reg_data = *((volatile uint32_t *)0x1A60A040);   // VBAT_ANA_REG2
-    if (DeviceID() == 2)
-        printf("Bandgap AON=%u\r\n", ((reg_data >> 22) & 30U) | ((reg_data >> 3) & 1U));
-    else 
-        printf("Bandgap AON=%u\r\n", (reg_data >> 23) & 15U);
+#if defined(ENSEMBLE_SOC_GEN2)
+    printf("Bandgap AON=%u\r\n", ((reg_data >> 22) & 30U) | ((reg_data >> 3) & 1U));
+#else
+    printf("Bandgap AON=%u\r\n", (reg_data >> 23) & 15U);
+#endif
     printf("AON LDO VOUT=%u\r\n",    (reg_data >> 27) & 15U);
     printf("MAIN LDO VOUT=%u\r\n\n", (reg_data & 7U));
 
     /* miscellaneous */
     printf("MISC Settings:\r\n");
     printf("GPIO_FLEX=%s\r\n", ((volatile uint32_t *)0x1A609000) ? "1.8V" : "3.3V");// VBATALL GPIO_CTRL
-    if (DeviceID() == 1) {
-        printf("DCDC_MODE=PFM\r\n");
-    }
-    else {
-        reg_data = *((volatile uint32_t *)0x1A60A034);
-        printf("DCDC_MODE=%s\r\n", (reg_data >> 23) & 1U ? "PFM" : "PWM");
-    }
+#if defined(ENSEMBLE_SOC_E1C)
+    printf("DCDC_MODE=PFM\r\n");
+#else
+    reg_data = *((volatile uint32_t *)0x1A60A034);
+    printf("DCDC_MODE=%s\r\n", (reg_data >> 23) & 1U ? "PFM" : "PWM");
+#endif
     reg_data = (*((volatile uint32_t *)0x1A60A030) >> 3) & 63U;
     printf("DCDC_TRIM[8:3]=%u (0x%02X)\r\n", reg_data, reg_data);
-    if (DeviceID() == 0) {
-        reg_data = *((volatile uint32_t *)0x1A60B000);
-        printf("MDM_RET=0x%08X\r\n", reg_data);
-        reg_data = *((volatile uint32_t *)0x1A60B008);
-        printf("MDM_CTRL=0x%08X\r\n", reg_data);
-    }
+#if !(defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C))
+    reg_data = *((volatile uint32_t *)0x1A60B000);
+    printf("MDM_RET=0x%08X\r\n", reg_data);
+    reg_data = *((volatile uint32_t *)0x1A60B008);
+    printf("MDM_CTRL=0x%08X\r\n", reg_data);
+#endif
     printf("\n");
 }

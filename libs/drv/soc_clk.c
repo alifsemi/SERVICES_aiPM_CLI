@@ -1,4 +1,3 @@
-#include "deviceID.h"
 #include "hostbase.h"
 #include "soc_clk.h"
 
@@ -36,10 +35,11 @@ static uint32_t GetDividerStandbyHFRC() {
 
 static uint32_t GetDividerActiveHFXO() {
     uint32_t shift_val;
-    if (DeviceID() == 0)
-        shift_val = ((AON->MISC_REG1 >> 13) & 15U);
-    else
-        shift_val = ((AON->MISC_REG1 >> 17) & 15U);
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+    shift_val = ((AON->MISC_REG1 >> 17) & 15U);
+#else
+    shift_val = ((AON->MISC_REG1 >> 13) & 15U);
+#endif
 
     if (shift_val > 7) {
         shift_val -= 8;
@@ -83,22 +83,19 @@ uint32_t SocTopClockHFOSC()
 uint32_t SystRefclkUpdate()
 {
     if (CGU->PLL_CLK_SEL & 1) {
-        if (DeviceID() == 1) {
-            SystemREFClock = 80000000;
-        }
-        else {
-            SystemREFClock = 100000000;
-        }
+#if defined(ENSEMBLE_SOC_E1C)
+        SystemREFClock = 80000000;
+#else
+        SystemREFClock = 100000000;
+#endif
     }
     else {
         if (CGU->OSC_CTRL & 1U) {
-            if (DeviceID() == 1) {
-                SystemREFClock = 76800000;
-            }
-            else {
-                SystemREFClock = SocTopClockHFXO();
-            }
-
+#if defined(ENSEMBLE_SOC_E1C) || defined(ENSEMBLE_SOC_GEN2)
+            SystemREFClock = 76800000;
+#else
+            SystemREFClock = SocTopClockHFXO();
+#endif
         }
         else {
             SystemREFClock = SocTopClockHFRC();
@@ -112,10 +109,11 @@ uint32_t SystRefclkUpdate()
   SYSPLL update function
  *----------------------------------------------------------------------------*/
 static uint32_t GetSyspllPLL() {
-    if (DeviceID() == 1)
-        return 160000000;
-    else
-        return 400000000;
+#if defined(ENSEMBLE_SOC_E1C)
+    return 160000000;
+#else
+    return 400000000;
+#endif
 }
 
 static uint32_t SystSyspllUpdate()
@@ -125,10 +123,11 @@ static uint32_t SystSyspllUpdate()
     }
     else {
         if (CGU->OSC_CTRL & 1) {
-            if (DeviceID() == 0)
-                return SocTopClockHFXO();
-            else
-                return 76800000;
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+            return 76800000;
+#else
+            return SocTopClockHFXO();
+#endif
         }
         else {
             return SocTopClockHFRC();
@@ -156,15 +155,14 @@ uint32_t SystBusClkUpdate()
         SystemAXIClock = SystSyspllUpdate() / ((HOSTBASE->ACLK_DIV0 >> 16) + 1);
     }
 
-    if (DeviceID() == 0) {
-        SystemAHBClock = SystemAXIClock >> hclk_div;
-        SystemAPBClock = SystemAXIClock >> pclk_div;
-    }
-    else {
-        uint32_t syspll_clk = SystSyspllUpdate();
-        SystemAHBClock = syspll_clk >> hclk_div;
-        SystemAPBClock = syspll_clk >> pclk_div;
-    }
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+    uint32_t syspll_clk = SystSyspllUpdate();
+    SystemAHBClock = syspll_clk >> hclk_div;
+    SystemAPBClock = syspll_clk >> pclk_div;
+#else
+    SystemAHBClock = SystemAXIClock >> hclk_div;
+    SystemAPBClock = SystemAXIClock >> pclk_div;
+#endif
 
     return SystemAXIClock;
 }
@@ -287,18 +285,7 @@ int32_t DivClockConfig(uint32_t div_active, uint32_t div_standby, uint32_t div_x
     ANA->VBAT_ANA_REG2 = reg_data;
 
     reg_data = *((volatile uint32_t *)0x1A604030);
-    if (DeviceID() == 0) {
-    /* MISC_REG1 Register (0x1A604030)
-     *
-     * cont_clkDiv[15:13]
-     *      HF XTAL is divided by 2^x, where x = 0 to 7
-     * sel_clkDivHi[16]
-     *      simply should be set to 0
-     */
-        reg_data &= ~(15 << 13);
-        reg_data |= (div_xtal << 13);
-    }
-    else {
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
     /* MISC_REG1 Register (0x1A604030)
      *
      * cont_clkDiv[19:17]
@@ -306,9 +293,19 @@ int32_t DivClockConfig(uint32_t div_active, uint32_t div_standby, uint32_t div_x
      * sel_clkDivHi[20]
      *      simply should be set to 0
      */
-        reg_data &= ~(15 << 17);
-        reg_data |= (div_xtal << 17);
-    }
+    reg_data &= ~(15 << 17);
+    reg_data |= (div_xtal << 17);
+#else
+    /* MISC_REG1 Register (0x1A604030)
+     *
+     * cont_clkDiv[15:13]
+     *      HF XTAL is divided by 2^x, where x = 0 to 7
+     * sel_clkDivHi[16]
+     *      simply should be set to 0
+     */
+    reg_data &= ~(15 << 13);
+    reg_data |= (div_xtal << 13);
+#endif
     *((volatile uint32_t *)0x1A604030) = reg_data;
 
     return 0;

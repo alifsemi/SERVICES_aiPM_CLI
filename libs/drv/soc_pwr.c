@@ -1,34 +1,32 @@
-#include "deviceID.h"
 #include "sys_utils.h"
 #include "soc_pwr.h"
 #include "alif.h"
 
 void enable_syst_sram(uint32_t sram_select)
 {
-    volatile uint32_t *reg_ptr, reg_data, devID = DeviceID();
+#if defined(ENSEMBLE_SOC_E1C)
+    return; /* not applicable for this family */
+#else
+    volatile uint32_t *reg_ptr, reg_data;
 
     reg_ptr = (uint32_t *) 0x1A602014;  /* CGU CLK_ENA register */
     reg_data = *reg_ptr;
 
-    if (devID == 1) {
-        return; /* not applicable for Spark */
+#if defined(ENSEMBLE_SOC_GEN2)
+    /* SRAM0 clock enable is bit 27 */
+    if (sram_select & SYST_SRAM0) {
+        reg_data |= (1UL << 27);
+    } else {
+        reg_data &= ~(1UL << 27);
     }
-    else if (devID == 2) {
-        /* SRAM0 clock enable is bit 27 */
-        if (sram_select & SYST_SRAM0) {
-            reg_data |= (1UL << 27);
-        } else {
-            reg_data &= ~(1UL << 27);
-        }
+#else
+    /* SRAM0 clock enable is bit 24 */
+    if (sram_select & SYST_SRAM0) {
+        reg_data |= (1UL << 24);
+    } else {
+        reg_data &= ~(1UL << 24);
     }
-    else {
-        /* SRAM0 clock enable is bit 24 */
-        if (sram_select & SYST_SRAM0) {
-            reg_data |= (1UL << 24);
-        } else {
-            reg_data &= ~(1UL << 24);
-        }
-    }
+#endif
 
     /* SRAM1 clock enable is bit 28 */
     if (sram_select & SYST_SRAM1) {
@@ -61,14 +59,14 @@ void enable_syst_sram(uint32_t sram_select)
     if (sram_select) {
         sys_busy_loop_us(60);
     }
+#endif
 }
 
 void enable_pd1_aon(uint32_t retention_select)
 {
-    if (DeviceID() != 0) {
-        return; /* only applicable for Bolt */
-    }
-
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+    return; /* not applicable for these families */
+#else
     /* Enable PD1 */
     *((volatile uint32_t *)0x1A60A004) |= 1U;
 
@@ -87,14 +85,14 @@ void enable_pd1_aon(uint32_t retention_select)
 
     /* PD4 PPU HWSTAT Value */
     while((*((volatile uint32_t *)0x1A605058) & 0x7FFUL) == 0);
+#endif
 }
 
 void disable_pd1_aon()
 {
-    if (DeviceID() != 0) {
-        return; /* only applicable for Bolt */
-    }
-
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+    return; /* not applicable for these families */
+#else
     /* Disable PD1 */
     *((volatile uint32_t *)0x1A60A004) &= ~1U;
 
@@ -103,14 +101,14 @@ void disable_pd1_aon()
 
     /* PD4 PPU HWSTAT Value */
     while((*((volatile uint32_t *)0x1A605058) & 0x7FFUL) != 0);
+#endif
 }
 
 void enable_pd4_sram(uint32_t pll_sel)
 {
-    if (DeviceID() != 0) {
-        return; /* only applicable for Bolt */
-    }
-
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+    return; /* not applicable for these families */
+#else
     /* Switch PD4 between HFXO and PLL-160M clock */
     *((volatile uint32_t *)0x1A605040) = pll_sel ? 3 : 0;
     *((volatile uint32_t *)0x1A60504C) = pll_sel ? 1 : 0;
@@ -120,17 +118,18 @@ void enable_pd4_sram(uint32_t pll_sel)
 
     /* PD4 PPU HWSTAT Value */
     while((*((volatile uint32_t *)0x1A605058) & 0x7FFUL) != 0x100);
+#endif
 }
 
 void disable_pd4_sram()
 {
-    if (DeviceID() != 0) {
-        return; /* only applicable for Bolt */
-    }
-
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+    return; /* not applicable for these families */
+#else
     /* Disable PD4 */
     *((volatile uint32_t *)0x1A605048) &= ~(1U << 12);
 
     /* PD4 PPU HWSTAT Value */
     while((*((volatile uint32_t *)0x1A605058) & 0x7FFUL) == 0x100);
+#endif
 }

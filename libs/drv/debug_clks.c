@@ -4,7 +4,6 @@
 #include "sys_clocks.h"
 #include "alif.h"
 
-#include "deviceID.h"
 #include "debug_clks.h"
 #include "soc_clk.h"
 
@@ -46,13 +45,13 @@ void DEBUG_frequencies() {
     else if (hfrc_div_standby > 2) hfrc_div_standby += 1;   // 2^(3   + 1) = 16 (4.8M)
                                                             // 2^(0-2 + 0) = 1-4 (76.8M-19.2M)
 
-    if (DeviceID() == 1) {
-        reg_data = ANA->DCDC_REG1;
-        hfrc_div_select = reg_data & 3U;
-    } else {
-        reg_data = ANA->DCDC_REG2;
-        hfrc_div_select = (reg_data >> 6) & 3U;
-    }
+#if defined(ENSEMBLE_SOC_E1C)
+    reg_data = ANA->DCDC_REG1;
+    hfrc_div_select = reg_data & 3U;
+#else
+    reg_data = ANA->DCDC_REG2;
+    hfrc_div_select = (reg_data >> 6) & 3U;
+#endif
 
     /* value of 0, 1, or 3 means HFRC ACTIVE divider is used */
     if (hfrc_div_select == 2)
@@ -66,11 +65,11 @@ void DEBUG_frequencies() {
     printf("[x] means clock is selected\r\n\n");
 
     reg_data = AON->RESERVED2[3];  // MISC_REG1
-    if (DeviceID() == 0)
-        hfxo_div = (reg_data >> 13) & 15U;
-    else
-        hfxo_div = (reg_data >> 17) & 15U;
-
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+    hfxo_div = (reg_data >> 17) & 15U;
+#else
+    hfxo_div = (reg_data >> 13) & 15U;
+#endif
     if (hfxo_div > 7) {
         hfxo_div -= 8;
         if (hfxo_div > 6) hfxo_div += 3;            // 2^(7   + 3) = 1024 (75k)
@@ -86,13 +85,13 @@ void DEBUG_frequencies() {
     printf("HFXO CLK%13dHz%s\r\n", hfxo_top_clock, active[reg_data & 1U]);
 
     reg_data = CGU->PLL_LOCK_CTRL;  // PLL_LOCK
-    if (DeviceID() == 0)
-        printf("PLL  CLK   2400000000Hz%s\r\n", active[reg_data & 1U]);
-    else if (DeviceID() == 1)
-        printf("PLL  CLK    480000000Hz%s\r\n", active[reg_data & 1U]);
-    else if (DeviceID() == 2)
-        printf("PLL  CLK    800000000Hz%s\r\n", active[reg_data & 1U]);
-
+#if defined(ENSEMBLE_SOC_GEN2)
+    printf("PLL  CLK    800000000Hz%s\r\n", active[reg_data & 1U]);
+#elif defined(ENSEMBLE_SOC_E1C)
+    printf("PLL  CLK    480000000Hz%s\r\n", active[reg_data & 1U]);
+#else
+    printf("PLL  CLK   2400000000Hz%s\r\n", active[reg_data & 1U]);
+#endif
     printf("[x] means clock is enabled\r\n\n");
 
     /* calculate hfrc_top_clock based on standby override bit */
@@ -108,15 +107,17 @@ void DEBUG_frequencies() {
     clk_ena = CGU->CLK_ENA;
     bus_clk_div = AON->SYSTOP_CLK_DIV;
 
-    if (DeviceID() == 1)
-        pll_boost = ((*(volatile uint32_t *)(0x1A605028)) >> 19) & 1;
+#if defined(ENSEMBLE_SOC_E1C)
+    pll_boost = ((*(volatile uint32_t *)(0x1A605028)) >> 19) & 1;
+#endif
 
     /* calculate the sys_osc_clk */
     if (hf_osc_sel & 1) {
-        if (DeviceID() == 0)
-            sys_osc_clk = hfxo_top_clock;
-        else
-            sys_osc_clk = 76800000;
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+        sys_osc_clk = 76800000;
+#else
+        sys_osc_clk = hfxo_top_clock;
+#endif
     }
     else {
         sys_osc_clk = hfrc_top_clock;
@@ -129,22 +130,23 @@ void DEBUG_frequencies() {
     else {
         periph_osc_clk = hfrc_top_clock >> 1;
     }
-    if (DeviceID() == 2)
-        printf("HFXO_OUT%13dHz%s\r\n", sys_osc_clk, (clk_ena & (1U << 19)) == 0 ? "*" : "");
-    else
-        printf("HFXO_OUT%13dHz%s\r\n", sys_osc_clk, (clk_ena & (1U << 18)) == 0 ? "*" : "");
+#if defined(ENSEMBLE_SOC_GEN2)
+    printf("HFXO_OUT%13dHz%s\r\n", sys_osc_clk, (clk_ena & (1U << 19)) == 0 ? "*" : "");
+#elif defined(ENSEMBLE_SOC_E1C)
+    printf("HFXO_OUT%13dHz%s\r\n", sys_osc_clk, (clk_ena & (1U << 18)) == 0 ? "*" : "");
+#endif 
     printf("HFOSC_CLK%12dHz%s\r\n", periph_osc_clk, gated[(clk_ena >> 23) & 1U]);
 
     /* calculate the REFCLK */
     if (pll_clk_sel & 1) {
-        if (DeviceID() == 1) {
-            if (pll_boost)
-                syst_refclk = 120000000;
-            else
-                syst_refclk = 80000000;
-        }
+#if defined(ENSEMBLE_SOC_E1C)
+        if (pll_boost)
+            syst_refclk = 120000000;
         else
-            syst_refclk = 100000000;
+            syst_refclk = 80000000;
+#else
+        syst_refclk = 100000000;
+#endif
     }
     else {
         syst_refclk = sys_osc_clk;
@@ -152,26 +154,27 @@ void DEBUG_frequencies() {
 
     /* calculate the CPUPLL_CLK and SYSPLL_CLK */
     if (pll_clk_sel & 16) {
-        if (DeviceID() == 1) {
-            if (pll_boost)
-                syspll_clk = 240000000;
-            else
-                syspll_clk = 160000000;
-        }
-        else {
+#if defined(ENSEMBLE_SOC_E1C)
+        if (pll_boost)
+            syspll_clk = 240000000;
+        else
+            syspll_clk = 160000000;
+#else
             cpupll_clk = 800000000;
             syspll_clk = 400000000;
-        }
+#endif
     }
     else {
         cpupll_clk = sys_osc_clk;
         syspll_clk = sys_osc_clk;
     }
 
-    if (DeviceID() != 1)
-        printf("CPUPLL_CLK%11dHz%s\r\n", cpupll_clk, gated[(clk_ena >> 4) & 1U]);
+#if !defined(ENSEMBLE_SOC_E1C)
+    printf("CPUPLL_CLK%11dHz%s\r\n", cpupll_clk, gated[(clk_ena >> 4) & 1U]);
+#endif
     printf("SYSPLL_CLK%11dHz%s\r\n", syspll_clk, gated[clk_ena & 1U]);
 
+#if !defined(ENSEMBLE_SOC_E1C)
     /* calculate the APSS_CLK */
     /* HOSTCPUCLK_CTRL value at [7:0] and
      * HOSTCPUCLK_DIV0 value at [15:8] and
@@ -197,8 +200,7 @@ void DEBUG_frequencies() {
     else {
         a32_cpuclk = 0;
     }
-    if (DeviceID() != 1)
-        printf("A32_CPUCLK%11dHz%s\r\n", a32_cpuclk, (apssclk_status & 0xF) == 0 ? gated[0] : gated[1]);
+    printf("A32_CPUCLK%11dHz%s\r\n", a32_cpuclk, (apssclk_status & 0xF) == 0 ? gated[0] : gated[1]);
 
     /* calculate the GIC_CLK */
     /* GICCLK_CTRL value at [7:0] and
@@ -218,8 +220,8 @@ void DEBUG_frequencies() {
     else {
         gic_clk = 0;
     }
-    if (DeviceID() != 1)
-        printf("GIC_CLK%14dHz%s\r\n", gic_clk, (gicclk_status & 0xF) == 0 ? gated[0] : gated[1]);
+    printf("GIC_CLK%14dHz%s\r\n", gic_clk, (gicclk_status & 0xF) == 0 ? gated[0] : gated[1]);
+#endif
 
     /* calculate the SYST_ACLK, HCLK, PCLK */
     /* ACLK_CTRL value at [7:0] and
@@ -240,31 +242,29 @@ void DEBUG_frequencies() {
         syst_aclk = 0;
     }
     printf("SYST_ACLK%12dHz%s\r\n", syst_aclk, (aclk_status & 0xF) == 0 ? gated[0] : gated[1]);
-    if (DeviceID() == 0) {
-        printf(" SRAM0_CLK%11dHz%s\r\n", syst_aclk, gated[(clk_ena >> 24) & 1U]);
-        printf(" SRAM1_CLK%11dHz%s\r\n", syst_aclk, gated[(clk_ena >> 28) & 1U]);
-    }
-    if (DeviceID() == 2) {
-        printf(" SRAM0_CLK%11dHz%s\r\n", syst_aclk, gated[(clk_ena >> 27) & 1U]);
-        printf(" SRAM1_CLK%11dHz%s\r\n", syst_aclk, gated[(clk_ena >> 28) & 1U]);
-    }
+#if defined(ENSEMBLE_SOC_GEN2)
+    printf(" SRAM0_CLK%11dHz%s\r\n", syst_aclk, gated[(clk_ena >> 27) & 1U]);
+    printf(" SRAM1_CLK%11dHz%s\r\n", syst_aclk, gated[(clk_ena >> 28) & 1U]);
+#elif defined(ENSEMBLE_SOC_E1C)
+#else
+    printf(" SRAM0_CLK%11dHz%s\r\n", syst_aclk, gated[(clk_ena >> 24) & 1U]);
+    printf(" SRAM1_CLK%11dHz%s\r\n", syst_aclk, gated[(clk_ena >> 28) & 1U]);
+#endif
 
-    if (DeviceID() == 0) {
-        /* HCLK and PCLK divider is 2^n, but n = 0-2 only */
-        reg_data = (bus_clk_div >> 8) & 3U; if (reg_data == 3) reg_data = 2;
-        syst_hclk = syst_aclk >> reg_data;
+    /* HCLK and PCLK divider is 2^n, but n = 0, 1, or 2 only */
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+    reg_data = (bus_clk_div >> 8) & 3U; if (reg_data == 3) reg_data = 2;
+    syst_hclk = syspll_clk >> reg_data;
 
-        reg_data = bus_clk_div & 3U; if (reg_data == 3) reg_data = 2;
-        syst_pclk = syst_aclk >> reg_data;
-    }
-    else {
-        /* HCLK and PCLK divider is 2^n, but n = 0-2 only */
-        reg_data = (bus_clk_div >> 8) & 3U; if (reg_data == 3) reg_data = 2;
-        syst_hclk = syspll_clk >> reg_data;
+    reg_data = bus_clk_div & 3U; if (reg_data == 3) reg_data = 2;
+    syst_pclk = syspll_clk >> reg_data;
+#else
+    reg_data = (bus_clk_div >> 8) & 3U; if (reg_data == 3) reg_data = 2;
+    syst_hclk = syst_aclk >> reg_data;
 
-        reg_data = bus_clk_div & 3U; if (reg_data == 3) reg_data = 2;
-        syst_pclk = syspll_clk >> reg_data;
-    }
+    reg_data = bus_clk_div & 3U; if (reg_data == 3) reg_data = 2;
+    syst_pclk = syst_aclk >> reg_data;
+#endif
 
     printf(" SYST_HCLK%11dHz\r\n", syst_hclk);
     printf(" SYST_PCLK%11dHz\r\n", syst_pclk);
@@ -310,30 +310,30 @@ void DEBUG_frequencies() {
     printf("DBG_CLK%14dHz%s\r\n", dbg_clk, (dbgclk_status & 0xF) == 0 ? gated[0] : gated[1]);
     printf("SYST_REFCLK%10dHz\r\n", syst_refclk);
 
-    if (DeviceID() != 1) {
-        /* calculate the RTSS_HP_CLK */
-        const uint32_t pll_rtss_hp_clocks[4] = {100000000UL, 200000000UL, 300000000UL, 400000000UL};
-        if (pll_clk_sel & (1U << 16)) {
-            rtss_hp_clk = pll_rtss_hp_clocks[es_clk_sel & 3U];
-        }
-        else {
-            switch((es_clk_sel >> 8) & 3U) {
-            case 0:
-                rtss_hp_clk = hfrc_top_clock;
-                break;
-            case 1:
-                rtss_hp_clk = hfrc_top_clock >> 1;
-                break;
-            case 2:
-                rtss_hp_clk = 76800000;
-                break;
-            case 3:
-                rtss_hp_clk = hfxo_top_clock;
-                break;
-            }
-        }
-        printf("RTSS_HP_CLK%10dHz%s\r\n", rtss_hp_clk, gated[(clk_ena >> 12) & 1U]);
+#if !defined(ENSEMBLE_SOC_E1C)
+    /* calculate the RTSS_HP_CLK */
+    const uint32_t pll_rtss_hp_clocks[4] = {100000000UL, 200000000UL, 300000000UL, 400000000UL};
+    if (pll_clk_sel & (1U << 16)) {
+        rtss_hp_clk = pll_rtss_hp_clocks[es_clk_sel & 3U];
     }
+    else {
+        switch((es_clk_sel >> 8) & 3U) {
+        case 0:
+            rtss_hp_clk = hfrc_top_clock;
+            break;
+        case 1:
+            rtss_hp_clk = hfrc_top_clock >> 1;
+            break;
+        case 2:
+            rtss_hp_clk = 76800000;
+            break;
+        case 3:
+            rtss_hp_clk = hfxo_top_clock;
+            break;
+        }
+    }
+    printf("RTSS_HP_CLK%10dHz%s\r\n", rtss_hp_clk, gated[(clk_ena >> 12) & 1U]);
+#endif
 
     /* calculate the RTSS_HE_CLK */
     const uint32_t pll_rtss_he_clocks[4] = {60000000UL, 80000000UL, 120000000UL, 160000000UL};
@@ -358,47 +358,46 @@ void DEBUG_frequencies() {
     }
     printf("RTSS_HE_CLK%10dHz%s\r\n", rtss_he_clk, gated[(clk_ena >> 13) & 1U]);
 
-    if (DeviceID() == 0) {
-        uint32_t pll_pd4_clocks[4] = {hfxo_top_clock, 0, 120000000, 160000000};
+#if !(defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C))
+    uint32_t pll_pd4_clocks[4] = {hfxo_top_clock, 0, 120000000, 160000000};
 
-        /* calculate PD4 SRAM6 to SRAM9 clocks */
-        if (*((volatile uint32_t *)0x1A60504C) & 1U) {
-            pd4_clk = pll_pd4_clocks[*((volatile uint32_t *)0x1A605040) & 3U];
-        }
-        else {
-            pd4_clk = pll_pd4_clocks[0];
-        }
-
-        /* check if PD4 is alive */
-        reg_data = *((volatile uint32_t *)0x1A605058);
-        reg_data &= 0x7FFUL;
-        printf("PD4_CLK%14dHz%s\r\n", pd4_clk, reg_data > 1 ? gated[1] : gated[0]);
-    }
-
-    if (DeviceID() == 2) {
-        printf(" 10M_CLK%13dHz%s\r\n",  10000000, gated[(clk_ena >> 9) & 1U]);
-        printf(" 20M_CLK%13dHz%s\r\n",  20000000, gated[(clk_ena >> 22) & 1U]);
-        printf(" 25M_CLK%13dHz%s\r\n",  25000000, gated[(clk_ena >> 5) & 1U]);
-        printf(" 50M_CLK%13dHz%s\r\n",  50000000, gated[(clk_ena >> 6) & 1U]);
-        printf(" 80M_CLK%13dHz%s\r\n",  80000000, gated[(clk_ena >> 10) & 1U]);
-        printf("100M_CLK%13dHz%s\r\n", 100000000, gated[(clk_ena >> 7) & 1U]);
-        printf("160M_CLK%13dHz%s\r\n", 160000000, gated[(clk_ena >> 20) & 1U]);
-        printf("200M_CLK%13dHz%s\r\n", 200000000, gated[(clk_ena >> 14) & 1U]);
-        printf("266M_CLK%13dHz%s\r\n", 266000000, gated[(clk_ena >> 21) & 1U]);
-        printf("400M_CLK%13dHz%s\r\n", 400000000, gated[(clk_ena >> 15) & 1U]);
-        printf("38.4M_CLK%12dHz%s\r\n", 38400000, gated[(clk_ena >> 23) & 1U]);
-        printf("76.8M_CLK%12dHz%s\r\n", 76800000, gated[(clk_ena >> 24) & 1U]);
-        printf("MRAM_CLK%13dHz%s\r\n", syst_aclk/6, gated[(clk_ena >> 11) & 1U]);
-        printf("ISP_CLK %13dHz%s\r\n", syst_aclk, gated[(clk_ena >> 29) & 1U]);
-        printf("JPEG_CLK%13dHz%s\r\n", syst_aclk, gated[(clk_ena >> 30) & 1U]);
-        printf("U85_CLK %13dHz%s\r\n", syst_aclk, gated[(clk_ena >> 31) & 1U]);
+    /* calculate PD4 SRAM6 to SRAM9 clocks */
+    if (*((volatile uint32_t *)0x1A60504C) & 1U) {
+        pd4_clk = pll_pd4_clocks[*((volatile uint32_t *)0x1A605040) & 3U];
     }
     else {
-        printf("10M/20M_CLK%10dHz%s\r\n", 20000000, gated[(clk_ena >> 22) & 1U]);
-        printf("100M_CLK%13dHz%s\r\n", 100000000, gated[(clk_ena >> 21) & 1U]);
-        printf("160M_CLK%13dHz%s\r\n", 160000000, gated[(clk_ena >> 20) & 1U]);
-        printf("38.4M_CLK%12dHz%s\r\n", 38400000, gated[(clk_ena >> 23) & 1U]);
+        pd4_clk = pll_pd4_clocks[0];
     }
+
+    /* check if PD4 is alive */
+    reg_data = *((volatile uint32_t *)0x1A605058);
+    reg_data &= 0x7FFUL;
+    printf("PD4_CLK%14dHz%s\r\n", pd4_clk, reg_data > 1 ? gated[1] : gated[0]);
+#endif
+
+#if defined(ENSEMBLE_SOC_GEN2)
+    printf(" 10M_CLK%13dHz%s\r\n",  10000000, gated[(clk_ena >> 9) & 1U]);
+    printf(" 20M_CLK%13dHz%s\r\n",  20000000, gated[(clk_ena >> 22) & 1U]);
+    printf(" 25M_CLK%13dHz%s\r\n",  25000000, gated[(clk_ena >> 5) & 1U]);
+    printf(" 50M_CLK%13dHz%s\r\n",  50000000, gated[(clk_ena >> 6) & 1U]);
+    printf(" 80M_CLK%13dHz%s\r\n",  80000000, gated[(clk_ena >> 10) & 1U]);
+    printf("100M_CLK%13dHz%s\r\n", 100000000, gated[(clk_ena >> 7) & 1U]);
+    printf("160M_CLK%13dHz%s\r\n", 160000000, gated[(clk_ena >> 20) & 1U]);
+    printf("200M_CLK%13dHz%s\r\n", 200000000, gated[(clk_ena >> 14) & 1U]);
+    printf("266M_CLK%13dHz%s\r\n", 266000000, gated[(clk_ena >> 21) & 1U]);
+    printf("400M_CLK%13dHz%s\r\n", 400000000, gated[(clk_ena >> 15) & 1U]);
+    printf("38.4M_CLK%12dHz%s\r\n", 38400000, gated[(clk_ena >> 23) & 1U]);
+    printf("76.8M_CLK%12dHz%s\r\n", 76800000, gated[(clk_ena >> 24) & 1U]);
+    printf("MRAM_CLK%13dHz%s\r\n", syst_aclk/6, gated[(clk_ena >> 11) & 1U]);
+    printf("ISP_CLK %13dHz%s\r\n", syst_aclk, gated[(clk_ena >> 29) & 1U]);
+    printf("JPEG_CLK%13dHz%s\r\n", syst_aclk, gated[(clk_ena >> 30) & 1U]);
+    printf("U85_CLK %13dHz%s\r\n", syst_aclk, gated[(clk_ena >> 31) & 1U]);
+#else
+    printf("10M/20M_CLK%10dHz%s\r\n", 20000000, gated[(clk_ena >> 22) & 1U]);
+    printf("100M_CLK%13dHz%s\r\n", 100000000, gated[(clk_ena >> 21) & 1U]);
+    printf("160M_CLK%13dHz%s\r\n", 160000000, gated[(clk_ena >> 20) & 1U]);
+    printf("38.4M_CLK%12dHz%s\r\n", 38400000, gated[(clk_ena >> 23) & 1U]);
+#endif
     printf("* means clock is gated\r\n\n");
 }
 
@@ -409,10 +408,10 @@ void DEBUG_peripherals() {
     printf("CANFD_CTRL         = 0x%08X\r\n", CLKCTL_PER_SLV->CANFD_CTRL);
     printf("I2S0_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[0]);
     printf("I2S1_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[1]);
-    if (DeviceID() != 1) {
-        printf("I2S2_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[2]);
-        printf("I2S3_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[3]);
-    }
+#if !defined(ENSEMBLE_SOC_E1C)
+    printf("I2S2_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[2]);
+    printf("I2S3_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[3]);
+#endif
     printf("I3C_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->I3C_CTRL);
     printf("SSI_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->SSI_CTRL);
     printf("ADC_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->ADC_CTRL);
@@ -421,52 +420,49 @@ void DEBUG_peripherals() {
 #if SOC_FEAT_OSPI_HAS_CLK_ENABLE
     printf("OSPI_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->OSPI_CTRL);
 #endif
-    if (DeviceID() != 0) {
-        printf("I2C0_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C0_CTRL);
-        printf("I2C1_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C1_CTRL);
-    }
-    if (DeviceID() == 2) {
-        printf("I2C2_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C2_CTRL);
-        printf("I2C3_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C3_CTRL);
-    }
+#if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
+    printf("I2C0_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C0_CTRL);
+    printf("I2C1_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C1_CTRL);
+#endif
+#if defined(ENSEMBLE_SOC_GEN2)
+    printf("I2C2_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C2_CTRL);
+    printf("I2C3_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C3_CTRL);
+#endif
 
     /* CLKCTL_PER_MST */
-    if (DeviceID() != 1) {
-        printf("CAMERA_PIXCLK_CTRL = 0x%08X\r\n", CLKCTL_PER_MST->CAMERA_PIXCLK_CTRL);
-        printf("CSI_PIXCLK_CTRL    = 0x%08X\r\n", CLKCTL_PER_MST->CSI_PIXCLK_CTRL);
-    }
+#if !defined(ENSEMBLE_SOC_E1C)
+    printf("CAMERA_PIXCLK_CTRL = 0x%08X\r\n", CLKCTL_PER_MST->CAMERA_PIXCLK_CTRL);
+    printf("CSI_PIXCLK_CTRL    = 0x%08X\r\n", CLKCTL_PER_MST->CSI_PIXCLK_CTRL);
+    printf("ETH_CTRL0          = 0x%08X\r\n", CLKCTL_PER_MST->ETH_CTRL0);
+#endif
     printf("CDC200_PIXCLK_CTRL = 0x%08X\r\n", CLKCTL_PER_MST->CDC200_PIXCLK_CTRL);
     printf("PERIPH_CLK_ENA     = 0x%08X\r\n", CLKCTL_PER_MST->PERIPH_CLK_ENA);
     printf("MIPI_CKEN          = 0x%08X\r\n", CLKCTL_PER_MST->MIPI_CKEN);
-    if (DeviceID() != 1) {
-        printf("ETH_CTRL0          = 0x%08X\r\n", CLKCTL_PER_MST->ETH_CTRL0);
-    }
-    if (DeviceID() == 0) {
-        printf("MRAM_CTRL/OSPI_CLK = 0x%08X\r\n", *(volatile uint32_t *)0x49041000);
-    }
+#if !(defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C))
+    printf("MRAM_CTRL/OSPI_CLK = 0x%08X\r\n", *(volatile uint32_t *)0x49041000);
+#endif
     printf("\n");
 
     /* M55LOCAL_CFG */
     printf("M55LOCAL_CLK_ENA   = 0x%08X\r\n", M55LOCAL_CFG->CLK_ENA);
     if (CoreID()) {
         printf("M55HE_LPI2S_CTRL   = 0x%08X\r\n", M55HE_CFG->HE_I2S_CTRL);
-        if(DeviceID() == 2) {
-            printf("M55HE_LPI3C_CTRL   = 0x%08X\r\n", M55HE_CFG->HE_I3C_CTRL);
-        }
+#if defined(ENSEMBLE_SOC_GEN2)
+        printf("M55HE_LPI3C_CTRL   = 0x%08X\r\n", M55HE_CFG->HE_I3C_CTRL);
+#endif
         printf("M55HE_LPCAM_PIXCLK = 0x%08X\r\n", M55HE_CFG->HE_CAMERA_PIXCLK);
     }
     printf("\n");
 }
 
 void DEBUG_clks_xvclks() {
-    if (DeviceID() == 1) {
-        pinconf_set(PORT_2, PIN_3, PINMUX_ALTERNATE_FUNCTION_5, 0);     // P2_3:  LPCAM_XVCLK (mux mode 5)
-        M55HE_CFG->HE_CAMERA_PIXCLK = 100U << 16 | 1;           // output RTSS_HE_CLK/100 on LPCAM_XVCLK pin
-    }
-    else {
-        pinconf_set(PORT_0, PIN_3, PINMUX_ALTERNATE_FUNCTION_6, 0);     // P0_3:  CAM_XVCLK   (mux mode 6)
-        pinconf_set(PORT_1, PIN_3, PINMUX_ALTERNATE_FUNCTION_5, 0);     // P1_3:  LPCAM_XVCLK (mux mode 5)
-        CLKCTL_PER_MST->CAMERA_PIXCLK_CTRL = 100U << 16 | 1;    // output SYST_ACLK/100 on CAM_XVCLK pin
-        M55HE_CFG->HE_CAMERA_PIXCLK = 100U << 16 | 1;           // output RTSS_HE_CLK/100 on LPCAM_XVCLK pin
-    }
+#if defined(ENSEMBLE_SOC_E1C)
+    pinconf_set(PORT_2, PIN_3, PINMUX_ALTERNATE_FUNCTION_5, 0);     // P2_3:  LPCAM_XVCLK (mux mode 5)
+    M55HE_CFG->HE_CAMERA_PIXCLK = 100U << 16 | 1;           // output RTSS_HE_CLK/100 on LPCAM_XVCLK pin
+#else
+    pinconf_set(PORT_0, PIN_3, PINMUX_ALTERNATE_FUNCTION_6, 0);     // P0_3:  CAM_XVCLK   (mux mode 6)
+    pinconf_set(PORT_1, PIN_3, PINMUX_ALTERNATE_FUNCTION_5, 0);     // P1_3:  LPCAM_XVCLK (mux mode 5)
+    CLKCTL_PER_MST->CAMERA_PIXCLK_CTRL = 100U << 16 | 1;    // output SYST_ACLK/100 on CAM_XVCLK pin
+    M55HE_CFG->HE_CAMERA_PIXCLK = 100U << 16 | 1;           // output RTSS_HE_CLK/100 on LPCAM_XVCLK pin
+#endif
 }

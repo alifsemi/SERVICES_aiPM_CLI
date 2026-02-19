@@ -1,7 +1,6 @@
 #include <stdint.h>
 #include "drv_counter.h"
 #include "drv_pll.h"
-#include "deviceID.h"
 
 #ifndef HW_REG32
 #define HW_REG32(u,v) (*((volatile uint32_t *)(u + v)))
@@ -166,19 +165,18 @@ void PLL_clkpll_start(uint32_t xtal_freq, bool faststart)
     if ((HW_REG32(SE_CGU_PLL_LOCK, 0) & 1) == 1) return;
     if ((HW_REG32(SE_XO_REG1, 0) & 1) == 0) return;
 
-    if (DeviceID() == 0)
-        PLL_clkpll_start_bolt(xtal_freq, faststart);
-    else if (DeviceID() == 1)
-        PLL_clkpll_start_spark(faststart);
-    else if (DeviceID() == 2)
+#if defined(ENSEMBLE_SOC_GEN2)
         PLL_clkpll_start_eagle(faststart);
-    else
-        while(1)
+#elif defined(ENSEMBLE_SOC_E1C)
+        PLL_clkpll_start_spark(faststart);
+#else
+        PLL_clkpll_start_bolt(xtal_freq, faststart);
+#endif
 
     /* set PLL LOCK bit */
     HW_REG32(SE_CGU_PLL_LOCK, 0) = 1;
 }
- 
+
 void PLL_clkpll_stop()
 {
     /* clear PLL LOCK bit */
