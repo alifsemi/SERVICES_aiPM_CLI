@@ -51,14 +51,10 @@ void DEBUG_power() {
 #else
     reg_data = *((volatile uint32_t *)0x1A60900C);   // VBATALL RET_CTRL
 #if defined(ENSEMBLE_SOC_GEN2)
-    reg_data |= 0xFFFFFFFFUL;
-    *((volatile uint32_t *)0x1A60900C) = reg_data;
     printf("SRAM0=0x%02X SRAM1=0x%02X\r\n",   (reg_data >> 8) & 255U, (reg_data >> 16) & 3U);
 #endif
     printf("BK RAM=0x%X HE TCM=0x%X\r\n",   (reg_data & 3U), (reg_data >> 4) & 15U);
     reg_data = *((volatile uint32_t *)0x1A60A018);   // VBATSEC RET_CTRL
-    reg_data |= 0xFFFFFFFFUL;
-    *((volatile uint32_t *)0x1A60900C) = reg_data;
     printf("FW RAM=0x%X SE RAM=0x%X\r\n",   (reg_data & 3U), (reg_data >> 4) & 3U);
 #endif
     printf("VBAT_WKUP=0x%08X\r\n\n",       *((volatile uint32_t *)0x1A60A008));// VBATSEC WKUP_CTRL
