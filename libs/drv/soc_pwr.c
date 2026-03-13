@@ -2,6 +2,22 @@
 #include "soc_pwr.h"
 #include "alif.h"
 
+void enable_dcdc_pfm(void) {
+#if defined(ENSEMBLE_SOC_E1C)
+    return; /* not applicable for this family */
+#else
+    ANA->DCDC_REG2 |= (1U << 23);
+#endif
+}
+
+void enable_dcdc_pwm(void) {
+#if defined(ENSEMBLE_SOC_E1C)
+    return; /* not applicable for this family */
+#else
+    ANA->DCDC_REG2 &= ~(1U << 23);
+#endif
+}
+
 void enable_syst_sram(uint32_t sram_select)
 {
 #if defined(ENSEMBLE_SOC_E1C)
