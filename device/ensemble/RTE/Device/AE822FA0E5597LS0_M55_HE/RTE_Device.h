@@ -3404,7 +3404,7 @@
 // <h> UART (Universal asynchronous receiver transmitter)
 // <e> UART0 (Universal asynchronous receiver transmitter) [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::Drivers:USART
-#define RTE_UART0 0
+#define RTE_UART0 1
 
 #if RTE_UART0
 
