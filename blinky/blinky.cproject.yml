@@ -15,4 +15,4 @@ project:
     - layer: ../device/ensemble/alif-ensemble.clayer.yml
 
   packs:
-    - pack: AlifSemiconductor::Ensemble
+    - pack: AlifSemiconductor::Ensemble@^2.0.2

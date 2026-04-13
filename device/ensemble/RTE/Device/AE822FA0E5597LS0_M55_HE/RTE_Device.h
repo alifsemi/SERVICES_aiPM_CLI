@@ -3404,7 +3404,7 @@
 // <h> UART (Universal asynchronous receiver transmitter)
 // <e> UART0 (Universal asynchronous receiver transmitter) [Driver_USART0]
 // <i> Configuration settings for Driver_USART0 in component ::Drivers:USART
-#define RTE_UART0 1
+#define RTE_UART0 0
 
 #if RTE_UART0
 
@@ -3522,7 +3522,7 @@
 
 // <e> UART2 (Universal asynchronous receiver transmitter) [Driver_USART2]
 // <i> Configuration settings for Driver_USART2 in component ::Drivers:USART
-#define RTE_UART2 0
+#define RTE_UART2 1
 
 #if RTE_UART2
 
@@ -3573,7 +3573,7 @@
 //    <1=> ENABLE
 // <i> Defines Blocking mode support for UART2
 // <i> Default: DISABLE
-#define RTE_UART2_BLOCKING_MODE_ENABLE 0
+#define RTE_UART2_BLOCKING_MODE_ENABLE 1
 
 #endif  // UART2
 
@@ -9826,7 +9826,7 @@
 
 // <e> GPIO6
 // <i> Configuration settings for Driver_GPIO6 in component ::Drivers:GPIO
-#define RTE_GPIO6 0
+#define RTE_GPIO6 1
 
 #if RTE_GPIO6
 

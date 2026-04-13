@@ -55,7 +55,9 @@ void print_se_startup_info()
         /* Spark A5 */
     (device_info.revision_id == 0xA501) ||
         /* Eagle engr samples */
-    (device_info.revision_id == 0x02A0))) {
+    (device_info.revision_id == 0x02A0) ||
+        /* Eagle engr samples */
+    (device_info.revision_id == 0x02A1))) {
         /* device not supported */
         printf("Application stopping, device revision %X is not supported.\r\n\n", device_info.revision_id);
         while(1);

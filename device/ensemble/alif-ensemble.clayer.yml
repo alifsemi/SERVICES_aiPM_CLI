@@ -15,12 +15,14 @@ layer:
         - +E1C-HE
     - component: ARM::CMSIS:CORE
     - component: AlifSemiconductor::BSP:Board Config
-    - component: Device:SOC Peripherals:MHU
+    - component: AlifSemiconductor::CMSIS Driver:USART
+    - component: AlifSemiconductor::Device:SOC Peripherals:GPIO
+    - component: AlifSemiconductor::Device:SOC Peripherals:MHU
     - component: AlifSemiconductor::Device:SOC Peripherals:PINCONF
     - component: AlifSemiconductor::Device:Startup
-    - component: Services:Secure Enclave:Initialization Helper&Source
-    - component: Services:Secure Enclave:core&Source
+    - component: AlifSemiconductor::Services:Secure Enclave:Initialization Helper&Source
+    - component: AlifSemiconductor::Services:Secure Enclave:core&Source
   packs:
-    - pack: ARM::CMSIS
-    - pack: ARM::CMSIS-Compiler
-    - pack: AlifSemiconductor::Ensemble
+    - pack: ARM::CMSIS@^6.0.0
+    - pack: ARM::CMSIS-Compiler@^2.0.0
+    - pack: AlifSemiconductor::Ensemble@^2.0.2
