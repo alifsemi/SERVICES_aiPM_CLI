@@ -213,9 +213,10 @@ int main (void)
     print_run_cfg(&runp);
 
     if (wakeup_event == 0) {
-        runp.dcdc_voltage = 775;
+        runp.dcdc_voltage = 825;
         runp.power_domains = PD6_MASK;// | PD8_MASK;
         runp.memory_blocks = MRAM_MASK | BACKUP4K_MASK;
+        // runp.memory_blocks |= SRAM0_MASK | SRAM1_MASK;
         runp.vdd_ioflex_3V3 = IOFLEX_LEVEL_1V8;
         runp.scaled_clk_freq = SCALED_FREQ_RC_STDBY_0_6_MHZ;
 
