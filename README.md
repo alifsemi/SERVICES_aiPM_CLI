@@ -14,7 +14,7 @@ This software is delivered for Alif Ensemble Devkits (Devkit-e7, Devkit-e8, and 
 
 ## Note about Ensemble silicon revisions
   - Devkit-e7: only silicon rev. B4 is supported
-  - Devkit-e8: only silicon rev. A0 is supported
+  - Devkit-e8: only silicon rev. A0 or A1 is supported
   - Devkit-e1c: only silicon rev. A5 or A6 is supported
 
 ## Quick start

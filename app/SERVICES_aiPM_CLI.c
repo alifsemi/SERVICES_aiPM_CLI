@@ -596,7 +596,8 @@ int main (void)
                 break;
 
             case 4:
-                /* ten seconds of deep sleep */
+                /* M55-HE: ten seconds of deep sleep 
+                 * M55-HP: subsystem stays in deep sleep until woken by MHU */
 #if defined(M55_HE)
                 lptimer_init();
 #endif
