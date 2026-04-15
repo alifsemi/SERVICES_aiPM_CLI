@@ -54,6 +54,8 @@ void print_se_startup_info()
     if (!((device_info.revision_id == 0xB400) ||
         /* Spark A5 */
     (device_info.revision_id == 0xA501) ||
+        /* Spark A7 */
+    (device_info.revision_id == 0xA701) ||
         /* Eagle engr samples */
     (device_info.revision_id == 0x02A0) ||
         /* Eagle engr samples */

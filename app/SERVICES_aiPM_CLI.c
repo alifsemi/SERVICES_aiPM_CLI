@@ -231,7 +231,9 @@ int main (void)
         SysTick_Config(CoreClockUpdate()/TICKS_PER_SECOND);
         reconfigure_uart();
         refclk_cntr_update();
+#if !defined(ENSEMBLE_SOC_E1C)
         HOSTBASE->BSYS_PWR_REQ = 0;
+#endif
 
         // ret = SERVICES_get_off_cfg(se_services_s_handle, &offp, &service_response);
         // if (ret != 0) {
