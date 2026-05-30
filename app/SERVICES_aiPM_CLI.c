@@ -546,11 +546,16 @@ int main (void)
                     break;
 
                 case 6:
-                    HOSTBASE->BSYS_PWR_REQ ^= 0x20;
+                    if (HOSTBASE->BSYS_PWR_REQ & 0x38U) {
+                        HOSTBASE->BSYS_PWR_REQ &= ~(0x38U);
+                    }
+                    else {
+                        HOSTBASE->BSYS_PWR_REQ |= 0x20U;
+                    }
                     break;
 
                 case 7:
-                    HOSTBASE->BSYS_PWR_REQ ^= 0x04;
+                    HOSTBASE->BSYS_PWR_REQ ^= 0x04U;
                     break;
 
                 case 8:

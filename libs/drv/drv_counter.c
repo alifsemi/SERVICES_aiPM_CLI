@@ -1,4 +1,5 @@
 #include <math.h>
+
 #include "drv_counter.h"
 #include "soc_clk.h"
 
@@ -35,23 +36,23 @@ uint32_t s32k_cntr_val() {
 uint64_t s32k_cntr_val64() {
     return *((volatile uint64_t *)0x1A400008);
 }
-\
+
 void delay_ms_s32k(uint32_t nticks) {
     uint64_t cntr_value = s32k_cntr_val64();
-    cntr_value += roundf(32.768 * nticks);
-    while (s32k_cntr_val() < cntr_value);
+    cntr_value += ((uint64_t)nticks * 32768 + 500) / 1000;
+    while (s32k_cntr_val64() < cntr_value);
 }
 
 void delay_us_s32k(uint32_t nticks) {
     uint64_t cntr_value = s32k_cntr_val64();
-    cntr_value += roundf(0.032768 * nticks);
+    cntr_value += ((uint64_t)nticks * 32768 + 500000) / 1000000;
     while (s32k_cntr_val64() < cntr_value);
 }
 
 void delay_us_refclk(uint32_t nticks) {
     uint64_t cntr_value = refclk_cntr_val64();
-    uint64_t nticks64 = refclk_cntr_freq() * nticks;
-    cntr_value += roundf(nticks64 / 1000000);
+    uint64_t nticks64 = refclk_cntr_freq() * (uint64_t)nticks;
+    cntr_value += (nticks64 + 500000) / 1000000;
     while (refclk_cntr_val64() < cntr_value);
 }
 

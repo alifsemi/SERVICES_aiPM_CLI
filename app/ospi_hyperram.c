@@ -214,17 +214,14 @@ static int32_t hyperram_reset(void)
 int ospi_hyperram_deinit(void)
 {
     int32_t ret;
-    OSPI_Type *ospi          = NULL;
     AES_Type  *aes           = NULL;
 
     /* Setup the OSPI/AES register map pointers based on the OSPI instance */
     if (issi_config.instance == OSPI_INSTANCE_0) {
-        ospi = (OSPI_Type *) OSPI0_BASE;
         aes  = (AES_Type *) AES0_BASE;
     }
 #ifdef RTE_OSPI1
     else {
-        ospi = (OSPI_Type *) OSPI1_BASE;
         aes  = (AES_Type *) AES1_BASE;
     }
 #endif
@@ -257,7 +254,7 @@ int ospi_hyperram_init(void)
         init_done = 1;
     }
 
-#define OSPI_VERIFICATION_STEP 0
+#define OSPI_VERIFICATION_STEP 1
 #if OSPI_VERIFICATION_STEP == 1
     uint32_t *const ptr          = (uint32_t *) OSPI_XIP_BASE;
     uint32_t        total_errors = 0, random_val;

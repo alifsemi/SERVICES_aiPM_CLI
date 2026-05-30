@@ -64,7 +64,7 @@ void DEBUG_frequencies() {
     printf("HFRC STANDBY%9dHz%s\r\n", hfrc_top_clock >> hfrc_div_standby, active[hfrc_div_select]);
     printf("[x] means clock is selected\r\n\n");
 
-    reg_data = AON->RESERVED2[3];  // MISC_REG1
+    reg_data = AON->MISC_REG1;  // MISC_REG1
 #if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
     hfxo_div = (reg_data >> 17) & 15U;
 #else

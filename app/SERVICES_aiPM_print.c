@@ -9,10 +9,6 @@ static const char star_bar[]      = "*******************************************
 static const char star_domains[]  = "* PD0 * PD1 * PD2 * PD3 * PD4 * PD5 * PD6 * PD7 * PD8 * PD9 *";
 static const char star_memories[] = "* SRAM0 * SRAM1 * HETCM1 * HETCM2 * MRAM * SERAM * BKUP4K * MASK     *";
 static const char star_clocks[]   = "* AON CLK * RUN CLK * SCALED CLK FREQ    * CPU FREQ *";
-static const char * star_ip_clks[]  = {
-    "* HP NPU * HE NPU * OSPI1 * CAN * SDC * USB * ETH *",
-    "* GPU * DPI * CPI * DSI * CSI * LP- * PHY PWR Mask *"
-};
 static const char star_dcdc[]     = "* DCDC      * Mode *";
 static const char star_wake[]     = "* VBAT    * SE EWIC * VTOR       *";
 static const char * str_pd_stat[] = { " OFF ", " ON  " };
@@ -175,59 +171,6 @@ static void print_cfg_clock_sources(uint32_t aon_clk, uint32_t run_clk, scaled_c
     printf(" %s ", str_scaled_clks[scaled_clk]);
     printf("%c", star_char);
     printf(" %s   ", str_cpu_clks[cpu_clk]);
-    printf("%c\r\n", star_char);
-}
-
-static void print_cfg_ip_clk_and_pwr(uint32_t ip_clk_gates, uint32_t phy_pwr_gates)
-{
-    uint32_t mask = 1;
-    printf("%s\r\n", star_bar);
-    printf("%s\r\n", star_ip_clks[0]);
-    while(mask < 0x4) {
-        printf("%c", star_char);
-        if (ip_clk_gates & mask) {
-            printf("%s   ", str_pd_stat[1]);
-        }
-        else {
-            printf("%s   ", str_pd_stat[0]);
-        }
-        mask = mask << 1;
-    }
-    mask = mask << 1;
-    printf("%c", star_char);
-    if (ip_clk_gates & mask) {
-        printf("%s  ", str_pd_stat[1]);
-    }
-    else {
-        printf("%s  ", str_pd_stat[0]);
-    }
-    mask = mask << 1;
-    while(mask < 0x100) {
-        printf("%c", star_char);
-        if (ip_clk_gates & mask) {
-            printf("%s", str_pd_stat[1]);
-        }
-        else {
-            printf("%s", str_pd_stat[0]);
-        }
-        mask = mask << 1;
-        if (mask & 0x4) mask = mask << 1;
-    }
-    printf("%c\r\n", star_char);
-    printf("%s\r\n", star_bar);
-    printf("%s\r\n", star_ip_clks[1]);
-    while(mask < 0x4000) {
-        printf("%c", star_char);
-        if (ip_clk_gates & mask) {
-            printf("%s", str_pd_stat[1]);
-        }
-        else {
-            printf("%s", str_pd_stat[0]);
-        }
-        mask = mask << 1;
-    }
-    printf("%c", star_char);
-    printf(" 0x%04X ", phy_pwr_gates);
     printf("%c\r\n", star_char);
 }
 
@@ -503,9 +446,6 @@ void print_dialog_configure_amux()
 
 void adjust_run_cfg(run_profile_t *runp, int32_t opt1, int32_t opt2)
 {
-    int32_t ret;
-    uint32_t service_response = 0;
-
     switch (opt1)
     {
     case 1:
@@ -553,9 +493,6 @@ void adjust_run_cfg(run_profile_t *runp, int32_t opt1, int32_t opt2)
 
 void adjust_off_cfg(off_profile_t *offp, int32_t opt1, int32_t opt2)
 {
-    int32_t ret;
-    uint32_t service_response = 0;
-
     switch (opt1)
     {
     case 1:

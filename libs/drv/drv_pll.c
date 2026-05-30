@@ -39,6 +39,7 @@ static void OSC_xtal_stop()
     HW_REG32(SE_ANATOP_REG1, 0) = 0;
 }
 
+#if !(defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C))
 static void PLL_clkpll_start_bolt(uint32_t xtal_freq, bool faststart)
 {
     uint32_t reg1_val = 0;
@@ -99,7 +100,9 @@ static void PLL_clkpll_start_bolt(uint32_t xtal_freq, bool faststart)
     *(volatile uint32_t *)0x1A602014 |= (1U << 18);
     *(volatile uint32_t *)0x1A602014 &= ~(1U << 18);
 }
+#endif
 
+#if defined(ENSEMBLE_SOC_E1C)
 static void PLL_clkpll_start_spark(bool faststart)
 {
     uint32_t reg1_val = 0x19 << 20;
@@ -126,7 +129,9 @@ static void PLL_clkpll_start_spark(bool faststart)
         HW_REG32(SE_MCU_CLKPLL_REG1, 0) = reg1_val;
     }
 }
+#endif
 
+#if defined(ENSEMBLE_SOC_GEN2)
 static void PLL_clkpll_start_eagle(bool faststart)
 {
     /* reg1_val = integer | (fractional) */
@@ -158,6 +163,7 @@ static void PLL_clkpll_start_eagle(bool faststart)
     *(volatile uint32_t *)0x1A602014 |= (1U << 18);
     *(volatile uint32_t *)0x1A602014 &= ~(1U << 18);
 }
+#endif
 
 void PLL_clkpll_start(uint32_t xtal_freq, bool faststart)
 {

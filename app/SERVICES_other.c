@@ -27,7 +27,7 @@ void print_se_startup_info()
     printf("SERVICES API Version: %s\r\n", SERVICES_version());
 
     char print_buffer[80] = {0};
-    ret = SERVICES_get_se_revision(se_services_s_handle, print_buffer, &service_response);
+    ret = SERVICES_get_se_revision(se_services_s_handle, (uint8_t *)print_buffer, &service_response);
     if (ret != 0) {
         SERVICES_ret(ret);
     }
@@ -81,7 +81,7 @@ void print_se_startup_info()
         if (toc_entry->cpu < TOC_NAME_COUNT) {
             printf("Entry %d: %s on %s (CPU %d)\r\n", toc_entry_num, toc_entry->image_identifier, str_cpu_names[toc_entry->cpu], toc_entry->cpu);
 #if USE_HARD_TOC_NAMES == 0
-            strncpy(toc_names[toc_entry->cpu], toc_entry->image_identifier, TOC_NAME_LENGTH);
+            strncpy(toc_names[toc_entry->cpu], (const char *)toc_entry->image_identifier, TOC_NAME_LENGTH);
 #endif
         }
     }
@@ -91,15 +91,16 @@ void print_se_startup_info()
 void SERVICES_boot_testing(int32_t boot_selection, int32_t cpu_selection)
 {
     int32_t ret = 0;
+    uint32_t boot_addr = 0;
     uint32_t service_response = 0;
 
     switch(boot_selection)
     {
     case 1:
 #if USE_HARD_TOC_NAMES == 0
-        ret = SERVICES_boot_process_toc_entry(se_services_s_handle, toc_names[cpu_selection], &service_response);
+        ret = SERVICES_boot_process_toc_entry(se_services_s_handle, (uint8_t *)toc_names[cpu_selection], &service_response);
 #else
-        ret = SERVICES_boot_process_toc_entry(se_services_s_handle, toc_hard_names[cpu_selection], &service_response);
+        ret = SERVICES_boot_process_toc_entry(se_services_s_handle, (uint8_t *)toc_hard_names[cpu_selection], &service_response);
 #endif
         if (ret != 0) {
             SERVICES_ret(ret);
@@ -110,7 +111,7 @@ void SERVICES_boot_testing(int32_t boot_selection, int32_t cpu_selection)
         break;
 
     case 2:
-        uint32_t boot_addr = print_dialog_boot_addr();
+        boot_addr = print_dialog_boot_addr();
         if (boot_addr == 1) {
             break;
         }
