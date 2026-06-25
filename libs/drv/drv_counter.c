@@ -72,11 +72,15 @@ void refclk_cntr_enable_cntbase_intr(uint32_t cntbase, uint64_t compare_val) {
     if (cntbase > 3) return;
     *((volatile uint64_t *)(0x1A230020 + (0x10000 * cntbase))) = compare_val;
     *((volatile uint32_t *)(0x1A23002C + (0x10000 * cntbase))) = 1;
+
+    NVIC_EnableIRQ(67 + cntbase);
 }
 
 void refclk_cntr_disable_cntbase_intr(uint32_t cntbase) {
     if (cntbase > 3) return;
     *((volatile uint32_t *)(0x1A23002C + (0x10000 * cntbase))) = 0;
+
+    NVIC_DisableIRQ(67 + cntbase);
 }
 
 void s32k_cntr_enable_cntbase(uint32_t cntbase) {
@@ -95,10 +99,38 @@ void s32k_cntr_enable_cntbase_intr(uint32_t cntbase, uint32_t compare_val) {
     if (cntbase > 1) return;
     *((volatile uint32_t *)(0x1A430020 + (0x10000 * cntbase))) = compare_val;
     *((volatile uint32_t *)(0x1A43002C + (0x10000 * cntbase))) = 1;
+
+    NVIC_EnableIRQ(71 + cntbase);
 }
 
 void s32k_cntr_disable_cntbase_intr(uint32_t cntbase) {
     if (cntbase > 1) return;
     *((volatile uint32_t *)(0x1A43002C + (0x10000 * cntbase))) = 0;
     while (*((volatile uint32_t *)(0x1A43002C + (0x10000 * cntbase))) != 0);
+
+    NVIC_DisableIRQ(71 + cntbase);
+}
+
+void REFCLK_CNTBASE0_IRQHandler() {
+    refclk_cntr_disable_cntbase_intr(0);
+}
+
+void REFCLK_CNTBASE1_IRQHandler() {
+    refclk_cntr_disable_cntbase_intr(1);
+}
+
+void REFCLK_CNTBASE2_IRQHandler() {
+    refclk_cntr_disable_cntbase_intr(2);
+}
+
+void REFCLK_CNTBASE3_IRQHandler() {
+    refclk_cntr_disable_cntbase_intr(3);
+}
+
+void S32K_CNTBASE0_IRQHandler() {
+    s32k_cntr_disable_cntbase_intr(0);
+}
+
+void S32K_CNTBASE1_IRQHandler() {
+    s32k_cntr_disable_cntbase_intr(1);
 }
