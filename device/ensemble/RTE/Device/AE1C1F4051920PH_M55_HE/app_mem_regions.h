@@ -22,7 +22,7 @@
 //   <o> RTSS HE Region size [bytes] <0x0-0x0018C000:8>
 //   <i> Defines size of RTSS HE application memory region.
 //   <i> Default: 0x0018C000
-#define APP_MRAM_HE_SIZE       0x0018C000
+#define APP_MRAM_HE_SIZE       0x001CD000
 
 // </h>
 

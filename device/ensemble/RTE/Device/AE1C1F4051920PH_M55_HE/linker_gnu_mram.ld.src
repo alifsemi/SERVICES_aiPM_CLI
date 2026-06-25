@@ -104,6 +104,12 @@ SECTIONS
     *(.kws_reference)
     *(.typical_reference)
   
+    . = ALIGN(8);
+    *(.ARM.extab* .gnu.linkonce.armextab.*)
+    . = ALIGN(8);
+    __exidx_start = .;
+    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
+    __exidx_end = .;
     . = ALIGN(16);
   } > ITCM AT > MRAM
 
@@ -113,16 +119,8 @@ SECTIONS
     *(.data)
     *(.data*)
     *(.typical_mem_map)
-    *arm_common_tables*(.data* .rodata*)
 
     KEEP(*(.jcr*))
-
-    . = ALIGN(8);
-    *(.ARM.extab* .gnu.linkonce.armextab.*)
-    . = ALIGN(8);
-    __exidx_start = .;
-    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    __exidx_end = .;
     . = ALIGN(16);
   } > DTCM AT > MRAM
 
