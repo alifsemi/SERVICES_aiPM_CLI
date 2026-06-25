@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
+
+#include <alif.h>
 #include <pinconf.h>
-#include "sys_clocks.h"
-#include "alif.h"
+#include <sys_clocks.h>
 
 #include "debug_clks.h"
 #include "soc_clk.h"
@@ -403,54 +405,54 @@ void DEBUG_frequencies() {
 
 void DEBUG_peripherals() {
     /* CLKCTL_PER_SLV */
-    printf("EXPMST0_CTRL       = 0x%08X\r\n", CLKCTL_PER_SLV->EXPMST0_CTRL);
-    printf("UART_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->UART_CTRL);
-    printf("CANFD_CTRL         = 0x%08X\r\n", CLKCTL_PER_SLV->CANFD_CTRL);
-    printf("I2S0_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[0]);
-    printf("I2S1_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[1]);
+    printf("EXPMST0_CTRL       = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->EXPMST0_CTRL);
+    printf("UART_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->UART_CTRL);
+    printf("CANFD_CTRL         = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->CANFD_CTRL);
+    printf("I2S0_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->I2S_CTRL[0]);
+    printf("I2S1_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->I2S_CTRL[1]);
 #if !defined(ENSEMBLE_SOC_E1C)
-    printf("I2S2_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[2]);
-    printf("I2S3_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2S_CTRL[3]);
+    printf("I2S2_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->I2S_CTRL[2]);
+    printf("I2S3_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->I2S_CTRL[3]);
 #endif
-    printf("I3C_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->I3C_CTRL);
-    printf("SSI_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->SSI_CTRL);
-    printf("ADC_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->ADC_CTRL);
-    printf("DAC_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->DAC_CTRL);
-    printf("CMP_CTRL           = 0x%08X\r\n", CLKCTL_PER_SLV->CMP_CTRL);
+    printf("I3C_CTRL           = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->I3C_CTRL);
+    printf("SSI_CTRL           = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->SSI_CTRL);
+    printf("ADC_CTRL           = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->ADC_CTRL);
+    printf("DAC_CTRL           = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->DAC_CTRL);
+    printf("CMP_CTRL           = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->CMP_CTRL);
 #if SOC_FEAT_OSPI_HAS_CLK_ENABLE
-    printf("OSPI_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->OSPI_CTRL);
+    printf("OSPI_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->OSPI_CTRL);
 #endif
 #if defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C)
-    printf("I2C0_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C0_CTRL);
-    printf("I2C1_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C1_CTRL);
+    printf("I2C0_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->I2C0_CTRL);
+    printf("I2C1_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->I2C1_CTRL);
 #endif
 #if defined(ENSEMBLE_SOC_GEN2)
-    printf("I2C2_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C2_CTRL);
-    printf("I2C3_CTRL          = 0x%08X\r\n", CLKCTL_PER_SLV->I2C3_CTRL);
+    printf("I2C2_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->I2C2_CTRL);
+    printf("I2C3_CTRL          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_SLV->I2C3_CTRL);
 #endif
 
     /* CLKCTL_PER_MST */
 #if !defined(ENSEMBLE_SOC_E1C)
-    printf("CAMERA_PIXCLK_CTRL = 0x%08X\r\n", CLKCTL_PER_MST->CAMERA_PIXCLK_CTRL);
-    printf("CSI_PIXCLK_CTRL    = 0x%08X\r\n", CLKCTL_PER_MST->CSI_PIXCLK_CTRL);
-    printf("ETH_CTRL0          = 0x%08X\r\n", CLKCTL_PER_MST->ETH_CTRL0);
+    printf("CAMERA_PIXCLK_CTRL = 0x%08" PRIX32 "\r\n", CLKCTL_PER_MST->CAMERA_PIXCLK_CTRL);
+    printf("CSI_PIXCLK_CTRL    = 0x%08" PRIX32 "\r\n", CLKCTL_PER_MST->CSI_PIXCLK_CTRL);
+    printf("ETH_CTRL0          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_MST->ETH_CTRL0);
 #endif
-    printf("CDC200_PIXCLK_CTRL = 0x%08X\r\n", CLKCTL_PER_MST->CDC200_PIXCLK_CTRL);
-    printf("PERIPH_CLK_ENA     = 0x%08X\r\n", CLKCTL_PER_MST->PERIPH_CLK_ENA);
-    printf("MIPI_CKEN          = 0x%08X\r\n", CLKCTL_PER_MST->MIPI_CKEN);
+    printf("CDC200_PIXCLK_CTRL = 0x%08" PRIX32 "\r\n", CLKCTL_PER_MST->CDC200_PIXCLK_CTRL);
+    printf("PERIPH_CLK_ENA     = 0x%08" PRIX32 "\r\n", CLKCTL_PER_MST->PERIPH_CLK_ENA);
+    printf("MIPI_CKEN          = 0x%08" PRIX32 "\r\n", CLKCTL_PER_MST->MIPI_CKEN);
 #if !(defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C))
-    printf("MRAM_CTRL/OSPI_CLK = 0x%08X\r\n", *(volatile uint32_t *)0x49041000);
+    printf("MRAM_CTRL/OSPI_CLK = 0x%08" PRIX32 "\r\n", *(volatile uint32_t *)0x49041000);
 #endif
     printf("\n");
 
     /* M55LOCAL_CFG */
-    printf("M55LOCAL_CLK_ENA   = 0x%08X\r\n", M55LOCAL_CFG->CLK_ENA);
+    printf("M55LOCAL_CLK_ENA   = 0x%08" PRIX32 "\r\n", M55LOCAL_CFG->CLK_ENA);
     if (CoreID()) {
-        printf("M55HE_LPI2S_CTRL   = 0x%08X\r\n", M55HE_CFG->HE_I2S_CTRL);
+        printf("M55HE_LPI2S_CTRL   = 0x%08" PRIX32 "\r\n", M55HE_CFG->HE_I2S_CTRL);
 #if defined(ENSEMBLE_SOC_GEN2)
-        printf("M55HE_LPI3C_CTRL   = 0x%08X\r\n", M55HE_CFG->HE_I3C_CTRL);
+        printf("M55HE_LPI3C_CTRL   = 0x%08" PRIX32 "\r\n", M55HE_CFG->HE_I3C_CTRL);
 #endif
-        printf("M55HE_LPCAM_PIXCLK = 0x%08X\r\n", M55HE_CFG->HE_CAMERA_PIXCLK);
+        printf("M55HE_LPCAM_PIXCLK = 0x%08" PRIX32 "\r\n", M55HE_CFG->HE_CAMERA_PIXCLK);
     }
     printf("\n");
 }

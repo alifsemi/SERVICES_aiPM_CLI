@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <inttypes.h>
+
 #include <alif.h>
 #include "app_mem_regions.h"
 
@@ -198,7 +200,7 @@ static void print_cfg_wake_settings(uint32_t vbat_cfg, uint32_t ewic_cfg, uint32
     printf("%c", star_char);
     printf(" 0x%05X ", ewic_cfg);
     printf("%c", star_char);
-    printf(" 0x%08X ", vtor_cfg);
+    printf(" 0x%08" PRIX32 " ", vtor_cfg);
     printf("%c\r\n", star_char);
 }
 
@@ -373,10 +375,10 @@ void print_dialog_read_reg()
         return;
     }
 
-    printf("Address: 0x%08X\r\n", address);
+    printf("Address: 0x%08" PRIX32 "\r\n", address);
     volatile uint32_t *ptr = (volatile uint32_t *) address;
     uint32_t reg_data = *ptr;
-    printf("RdData:  0x%08X\r\n\n", reg_data);
+    printf("RdData:  0x%08" PRIX32 "\r\n\n", reg_data);
 }
 
 void print_dialog_write_reg()
@@ -403,7 +405,7 @@ void print_dialog_write_reg()
     scanf("%x", &value);
     printf("%x\r\n", value);
 
-    printf("Address: 0x%08X\r\n", address);
+    printf("Address: 0x%08" PRIX32 "\r\n", address);
 
     volatile uint32_t *ptr = (volatile uint32_t *) address;
     uint32_t reg_data = *ptr;
@@ -411,11 +413,11 @@ void print_dialog_write_reg()
     reg_data |= (value & mask);
     *ptr = reg_data;
 
-    printf("RegMask: 0x%08X\r\n", mask);
-    printf("WrData:  0x%08X\r\n", value);
+    printf("RegMask: 0x%08" PRIX32 "\r\n", mask);
+    printf("WrData:  0x%08" PRIX32 "\r\n", value);
 
     reg_data = *ptr;
-    printf("RdData:  0x%08X\r\n\n", reg_data);
+    printf("RdData:  0x%08" PRIX32 "\r\n\n", reg_data);
 }
 
 void print_dialog_configure_amux()

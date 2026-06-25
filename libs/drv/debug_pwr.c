@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <cmsis_compiler.h>
-#include "alif.h"
+
+#include <alif.h>
 
 #include "debug_pwr.h"
 
@@ -34,9 +36,9 @@ void DEBUG_power() {
 
     /* get m55 vtor addresses */
     reg_data = *((volatile uint32_t *)0x1A605014);
-    printf("M55_HP VTOR=0x%08X\r\n", reg_data);
+    printf("M55_HP VTOR=0x%08" PRIX32 "\r\n", reg_data);
     reg_data = *((volatile uint32_t *)0x1A60A024);
-    printf("M55_HE VTOR=0x%08X\r\n\n", reg_data);
+    printf("M55_HE VTOR=0x%08" PRIX32 "\r\n\n", reg_data);
 
     /* retention settings & stop mode wakeup source enables */
     printf("RETENTON Settings:\r\n");
@@ -57,11 +59,11 @@ void DEBUG_power() {
     reg_data = *((volatile uint32_t *)0x1A60A018);   // VBATSEC RET_CTRL
     printf("FW RAM=0x%X SE RAM=0x%X\r\n",   (reg_data & 3U), (reg_data >> 4) & 3U);
 #endif
-    printf("VBAT_WKUP=0x%08X\r\n\n",       *((volatile uint32_t *)0x1A60A008));// VBATSEC WKUP_CTRL
+    printf("VBAT_WKUP=0x%08" PRIX32 "\r\n\n",       *((volatile uint32_t *)0x1A60A008));// VBATSEC WKUP_CTRL
 
     printf("PHY Power:\r\n");
     reg_data = *((volatile uint32_t *)0x1A609008);   // VBATALL PWR_CTRL
-    printf("PWR_CTRL=0x%08X\r\n\n", reg_data);
+    printf("PWR_CTRL=0x%08" PRIX32 "\r\n\n", reg_data);
 
     /* bandgap trim settings */
     printf("TRIM Settings:\r\n");
@@ -93,9 +95,9 @@ void DEBUG_power() {
     printf("DCDC_TRIM[8:3]=%u (0x%02X)\r\n", reg_data, reg_data);
 #if !(defined(ENSEMBLE_SOC_GEN2) || defined(ENSEMBLE_SOC_E1C))
     reg_data = *((volatile uint32_t *)0x1A60B000);
-    printf("MDM_RET=0x%08X\r\n", reg_data);
+    printf("MDM_RET=0x%08" PRIX32 "\r\n", reg_data);
     reg_data = *((volatile uint32_t *)0x1A60B008);
-    printf("MDM_CTRL=0x%08X\r\n", reg_data);
+    printf("MDM_CTRL=0x%08" PRIX32 "\r\n", reg_data);
 #endif
     printf("\n");
 }
