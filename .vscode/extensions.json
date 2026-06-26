@@ -3,7 +3,6 @@
         "arm.environment-manager",
         "arm.cmsis-csolution",
         "llvm-vs-code-extensions.vscode-clangd",
-        "ms-vscode.cpptools-extension-pack",
         "marus25.cortex-debug"
     ]
 }
