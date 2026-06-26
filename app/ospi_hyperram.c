@@ -56,7 +56,9 @@ static const ospi_hyperram_xip_config issi_config = {
     .hyperram_init  = NULL, /* No special initialization needed by issi hyperram device */
     .ddr_drive_edge = DDR_DRIVE_EDGE,
     .rxds_delay     = RXDS_DELAY,
+#if SOC_FEAT_AES_OSPI_SIGNALS_DELAY
     .signal_delay   = SIGNAL_DELAY,
+#endif
     .wait_cycles    = WAIT_CYCLES,
     .dfs            = OSPI_DFS,
     .slave_select   = SLAVE_SELECT,
