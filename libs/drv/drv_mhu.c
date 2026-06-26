@@ -1,5 +1,5 @@
-#include <RTE_Components.h>
-#include CMSIS_device_header
+#include <soc.h>
+
 #include "drv_mhu.h"
 
 static MHU_Callback_t user_rx_cb;

@@ -1,8 +1,9 @@
+#include <soc.h>
+#include <system.h>
+#include <sys_clocks.h>
+
 #include "hostbase.h"
 #include "soc_clk.h"
-
-#include "sys_clocks.h"
-#include "alif.h"
 
 /*----------------------------------------------------------------------------
   Core identification function (0 = RTSS_HP, 1 = RTSS_HE)

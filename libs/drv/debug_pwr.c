@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdint.h>
 #include <inttypes.h>
 #include <cmsis_compiler.h>
 

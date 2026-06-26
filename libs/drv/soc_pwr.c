@@ -1,6 +1,7 @@
-#include "sys_utils.h"
+#include <soc.h>
+#include <sys_utils.h>
+
 #include "soc_pwr.h"
-#include "alif.h"
 
 void enable_dcdc_pfm(void) {
 #if defined(ENSEMBLE_SOC_E1C)

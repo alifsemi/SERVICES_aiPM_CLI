@@ -1,4 +1,4 @@
-#include <math.h>
+#include <soc.h>
 
 #include "drv_counter.h"
 #include "soc_clk.h"

@@ -1,5 +1,5 @@
-#include "soc.h"
-#include "app_mem_regions.h"
+#include <soc.h>
+#include <app_mem_regions.h>
 
 #include "hostbase.h"
 #include "soc_rst.h"
@@ -7,7 +7,7 @@
 void reset_external_system0(uint32_t vtor_address)
 {
 #if !defined(ENSEMBLE_SOC_E1C)
-    *((volatile uint32_t *)0x1A604000) = 0;
+    AON->RTSS_HP_CTRL = 0;
     *((volatile uint32_t *)0x1A605014) = vtor_address;
 
     /* apply reset & M55 CPUWAIT */
@@ -23,7 +23,7 @@ void reset_external_system0(uint32_t vtor_address)
 
 void reset_external_system1(uint32_t vtor_address)
 {
-    *((volatile uint32_t *)0x1A604010) = 0;
+    AON->RTSS_HE_CTRL = 0;
     *((volatile uint32_t *)0x1A60A024) = vtor_address;
 
     /* apply reset & M55 CPUWAIT */
