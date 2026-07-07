@@ -114,6 +114,13 @@ static int32_t print_wakeup_source()
 {
     int32_t ret = 0;
 
+    /* this bit indicates we have previously entered stop mode, write 1 to clear */
+    if (STOP_MODE->VBAT_STOP_MODE_REG & (1U << 4)) {
+        STOP_MODE->VBAT_STOP_MODE_REG = (1U << 4);
+        printf("Wakeup from Stop Mode\r\n");
+        ret = 1;
+    }
+
     /* check the pending status of IRQs that are capable of powering up the M55 */
     /* then enable IRQ to allow ISR to clear the pending status */
     if (NVIC_GetPendingIRQ(41)) {
@@ -567,7 +574,7 @@ int main (void)
     pinconf_set(PRINTF_UART_CONSOLE_TX_PORT_NUM,  PRINTF_UART_CONSOLE_TX_PIN, 0, 0);     /* set TX_PIN as input */
 #endif
                     /* this pulls the plug, there is no coming back from this */
-                    STOP_MODE->VBAT_STOP_MODE_REG = 1U; __DSB(); __ISB();
+                    STOP_MODE->VBAT_STOP_MODE_REG = 0x11U; __DSB(); __ISB();
                     break;
 
                 default:
