@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/tools/projmgr/2.6.0/tools/projmgr/schemas/cproject.schema.json
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Open-CMSIS-Pack/devtools/tools/projmgr/2.12.0/tools/projmgr/schemas/cproject.schema.json
 project:
   groups:
     - group: App
@@ -90,7 +90,7 @@ project:
   packs:
     - pack: ARM::CMSIS@^6.0.0
     - pack: ARM::CMSIS-Compiler@^2.0.0
-    - pack: AlifSemiconductor::Ensemble@2.0.4
+    - pack: AlifSemiconductor::Ensemble@2.1.0
   components:
     - component: ARM::CMSIS-Compiler:CORE
     - component: ARM::CMSIS-Compiler:STDIN:Custom
