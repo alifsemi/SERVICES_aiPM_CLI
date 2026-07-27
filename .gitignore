@@ -6,3 +6,4 @@ tmp/
 *.clangd
 cmsis.json
 settings.json
+RTE_Components.h
