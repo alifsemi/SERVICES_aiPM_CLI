@@ -78,7 +78,7 @@ extern "C" {
     " !!! ****** \n"
 #endif
 
-#if (PRINTF_UART_CONSOLE == LP) /* Instance A_RX & Instance C_TX */
+#if (PRINTF_UART_CONSOLE == LP) /* Instance A_RX & Instance B_TX */
 #define PRINTF_UART_CONSOLE_RX_PORT_NUM        PORT_2
 #define PRINTF_UART_CONSOLE_TX_PORT_NUM        PORT_7
 #define PRINTF_UART_CONSOLE_RX_PIN             PIN_0

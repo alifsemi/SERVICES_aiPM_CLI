@@ -88,12 +88,12 @@ SECTIONS
     __zero_table_start__ = .;
     LONG (ADDR(.bss))
     LONG (SIZEOF(.bss)/4)
-  #if __HAS_BULK_SRAM
+#if __HAS_BULK_SRAM
     LONG (ADDR(.bss.at_sram0))
     LONG (SIZEOF(.bss.at_sram0)/4)
     LONG (ADDR(.bss.at_sram1))
     LONG (SIZEOF(.bss.at_sram1)/4)
-  #endif
+#endif
     __zero_table_end__ = .;
     . = ALIGN(16);
   } > MRAM
