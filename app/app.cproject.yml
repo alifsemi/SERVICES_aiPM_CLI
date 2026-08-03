@@ -4,7 +4,7 @@ project:
     - group: App
       files:
         - file: mem_tester.c
-        - file: ospi_hyperram.c
+        - file: ospi_psram.c
           for-context:
             - +E8-HE
             - +E8-HP
@@ -71,6 +71,7 @@ project:
     - ../libs/drv
     - ../libs/npu
 
+  # TCM-only build is not supported, selecting the MRAM XIP linker script below
   linker:
     - script: "../device/ensemble/RTE/Device/$Dname$_$Pname$/linker_gnu_mram.ld.src"
 

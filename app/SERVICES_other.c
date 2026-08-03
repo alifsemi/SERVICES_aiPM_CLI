@@ -56,6 +56,8 @@ void print_se_startup_info()
     (device_info.revision_id == 0xA501) ||
         /* Spark A7 */
     (device_info.revision_id == 0xA701) ||
+        /* Spark A8 */
+    (device_info.revision_id == 0xA801) ||
         /* Eagle engr samples */
     (device_info.revision_id == 0x02A0) ||
         /* Eagle engr samples */

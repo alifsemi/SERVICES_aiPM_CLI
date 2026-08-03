@@ -3,15 +3,14 @@
 #include <string.h>
 #include <inttypes.h>
 
+#include <alif.h>
 #include <RTE_Components.h>
-#include CMSIS_device_header
 #include <se_services_port.h>
 #include <app_mem_regions.h>
 #include <board_config.h>
 #include <sys_clocks.h>
 #include <pinconf.h>
 #include <aipm.h>
-#include <alif.h>
 
 #if defined(RTE_CMSIS_Compiler_STDIN_Custom) || defined(RTE_CMSIS_Compiler_STDOUT_Custom)
 #include <retarget_init.h>
@@ -669,7 +668,9 @@ int main (void)
 #if defined(ENSEMBLE_SOC_GEN2)
                 /* ten seconds of Ethos "Typical" Test Case */
                 SystBusClkUpdate();
+                enable_syst_sram(SYST_SRAM0);
                 npuTestStartU85(roundf(0.00041 * SystemAXIClock), 0);
+                enable_syst_sram(0);
 #else
                 printf("Feature not implemented on this device\r\n\n");
 #endif

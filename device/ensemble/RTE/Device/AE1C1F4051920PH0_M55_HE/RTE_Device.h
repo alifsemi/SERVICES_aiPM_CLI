@@ -2102,7 +2102,7 @@
 //    <1=> ENABLE
 // <i> Defines Blocking mode support for LPUART
 // <i> Default: DISABLE
-#define RTE_LPUART_BLOCKING_MODE_ENABLE 0
+#define RTE_LPUART_BLOCKING_MODE_ENABLE 1
 
 #endif  // RTE_LPUART
 
@@ -4828,7 +4828,7 @@
 //     <1=> Enable
 // <i> define Handle Spurious Wakeup
 // <i> default: Enable
-#define PM_HANDLE_SPURIOUS_WAKEUP 1
+#define PM_HANDLE_SPURIOUS_WAKEUP 0
 // </h> Power Management (PM)
 
 #endif /* __RTE_DEVICE_H */

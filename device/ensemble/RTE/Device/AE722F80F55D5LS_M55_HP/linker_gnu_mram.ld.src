@@ -33,13 +33,6 @@
 #define __ROM_BASE               APP_MRAM_HP_BASE
 #define __ROM_SIZE               APP_MRAM_HP_SIZE
 
-/*
- * Note:
- * The empty regions(eg SRAM1) are ON by default, but may have been released
- * by some example applications. So make sure your application requests
- * power for these regions before adding contents.
- */
-
 MEMORY
 {
   ITCM  (rwx) : ORIGIN = APP_ITCM_BASE , LENGTH = APP_HP_ITCM_SIZE
@@ -48,6 +41,9 @@ MEMORY
   SRAM0 (rwx) : ORIGIN = APP_SRAM0_BASE, LENGTH = APP_SRAM0_SIZE
   SRAM1 (rwx) : ORIGIN = APP_SRAM1_BASE, LENGTH = APP_SRAM1_SIZE
   #endif
+  #if __HAS_HYPER_RAM
+  HRAM  (rwx) : ORIGIN = APP_HRAM_HP_BASE, LENGTH = APP_HRAM_HP_SIZE
+  #endif
   MRAM  (rx)  : ORIGIN = __ROM_BASE, LENGTH = __ROM_SIZE
 }
 
@@ -55,17 +51,23 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
+  /DISCARD/ :
+  {
+      *(.ARM.exidx*)
+      *(.ARM.extab* .gnu.linkonce.armextab.*)
+  }
+
   .startup.at_mram : ALIGN(2048)
   {
     KEEP(*(.vectors))
 
-    *startup*(.text .rodata*)
-    *system*(.text .rodata*)
-    *tgu*(.text .rodata*)
-    *mpu*(.text .rodata*)
-    *sau_tcm_ns_setup*(.text .rodata*)
+    *startup*(.text* .rodata*)
+    *system*(.text* .rodata*)
+    *mpu*(.text* .rodata*)
+    *tgu*(.text* .rodata*)
+    *sau_tcm_ns_setup*(.text* .rodata*)
 
-    *lv_*(.text .rodata*)
+    *lv_*(.text* .rodata*)
 
     . = ALIGN(16);
   } > MRAM
@@ -112,7 +114,6 @@ SECTIONS
     *arm_common_tables*(.data* .rodata*)
 
     KEEP(*(.jcr*))
-
     . = ALIGN(16);
   } > DTCM AT > MRAM
 
@@ -127,18 +128,25 @@ SECTIONS
 
   .bss.sram0_noinit (NOLOAD) : ALIGN(8)
   {
-    * (.bss.kws_workspace_sram)
+    *(.bss.kws_workspace_sram)
   } > SRAM0
 
   .bss.sram1_noinit (NOLOAD) : ALIGN(8)
   {
-    * (.bss.kws_model_sram)
+    *(.bss.kws_model_sram)
   } > SRAM1
+  #endif
+
+  #if __HAS_HYPER_RAM
+  .bss.hram_noinit (NOLOAD) : ALIGN(8)
+  {
+    *(.bss.kws_model_hram)
+  } > HRAM
   #endif
 
   .bss.itcm_noinit (NOLOAD) : ALIGN(8)
   {
-    * (.bss.kws_model_tcm)
+    *(.bss.kws_model_tcm)
   } > ITCM
 
   .bss.dtcm_noinit (NOLOAD) : ALIGN(8)
@@ -222,6 +230,8 @@ SECTIONS
     *(.kws_model)
     *(.kws_reference)
     *(.typical_reference)
+    *(.typical_u85_mem_map)
+    *(.typical_u85_reference)
 
     KEEP(*(.eh_frame*))
     . = ALIGN(16);

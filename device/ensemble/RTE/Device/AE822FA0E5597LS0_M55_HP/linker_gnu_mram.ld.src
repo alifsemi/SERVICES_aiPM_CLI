@@ -33,19 +33,14 @@
 #define __ROM_BASE               APP_MRAM_HP_BASE
 #define __ROM_SIZE               APP_MRAM_HP_SIZE
 
-/*
- * Note:
- * The empty regions(eg SRAM1) are ON by default, but may have been released
- * by some example applications. So make sure your application requests
- * power for these regions before adding contents.
- */
-
 MEMORY
 {
   ITCM  (rwx) : ORIGIN = APP_ITCM_BASE , LENGTH = APP_HP_ITCM_SIZE
   DTCM  (rwx) : ORIGIN = APP_DTCM_BASE , LENGTH = APP_HP_DTCM_SIZE
+  #if __HAS_BULK_SRAM
   SRAM0 (rwx) : ORIGIN = APP_SRAM0_BASE, LENGTH = APP_SRAM0_SIZE
   SRAM1 (rwx) : ORIGIN = APP_SRAM1_BASE, LENGTH = APP_SRAM1_SIZE
+  #endif
   #if __HAS_HYPER_RAM
   HRAM  (rwx) : ORIGIN = APP_HRAM_HP_BASE, LENGTH = APP_HRAM_HP_SIZE
   #endif
@@ -56,17 +51,23 @@ ENTRY(Reset_Handler)
 
 SECTIONS
 {
+  /DISCARD/ :
+  {
+      *(.ARM.exidx*)
+      *(.ARM.extab* .gnu.linkonce.armextab.*)
+  }
+
   .startup.at_mram : ALIGN(2048)
   {
     KEEP(*(.vectors))
 
-    *startup*(.text .rodata*)
-    *system*(.text .rodata*)
-    *mpu*(.text .rodata*)
-    *tgu*(.text .rodata*)
-    *sau_tcm_ns_setup*(.text .rodata*)
+    *startup*(.text* .rodata*)
+    *system*(.text* .rodata*)
+    *mpu*(.text* .rodata*)
+    *tgu*(.text* .rodata*)
+    *sau_tcm_ns_setup*(.text* .rodata*)
 
-    *lv_*(.text .rodata*)
+    *lv_*(.text* .rodata*)
 
     . = ALIGN(16);
   } > MRAM
@@ -89,10 +90,12 @@ SECTIONS
     __zero_table_start__ = .;
     LONG (ADDR(.bss))
     LONG (SIZEOF(.bss)/4)
+  #if __HAS_BULK_SRAM
     LONG (ADDR(.bss.at_sram0))
     LONG (SIZEOF(.bss.at_sram0)/4)
     LONG (ADDR(.bss.at_sram1))
     LONG (SIZEOF(.bss.at_sram1)/4)
+  #endif
     __zero_table_end__ = .;
     . = ALIGN(16);
   } > MRAM
@@ -114,6 +117,7 @@ SECTIONS
     . = ALIGN(16);
   } > DTCM AT > MRAM
 
+  #if __HAS_BULK_SRAM
   .bss.at_sram0 (NOLOAD) : ALIGN(8)
   {
   } > SRAM0
@@ -124,18 +128,19 @@ SECTIONS
 
   .bss.sram0_noinit (NOLOAD) : ALIGN(8)
   {
-    * (.bss.kws_workspace_sram)
+    *(.bss.kws_workspace_sram)
   } > SRAM0
 
   .bss.sram1_noinit (NOLOAD) : ALIGN(8)
   {
-    * (.bss.kws_model_sram)
+    *(.bss.kws_model_sram)
   } > SRAM1
+  #endif
 
   #if __HAS_HYPER_RAM
   .bss.hram_noinit (NOLOAD) : ALIGN(8)
   {
-    * (.bss.kws_model_hram)
+    *(.bss.kws_model_hram)
   } > HRAM
   #endif
 
@@ -170,7 +175,6 @@ SECTIONS
     __HeapLimit = .;
   } > DTCM
 
-  /* .stack (NOLOAD) : ALIGN(8) */
   .stack (ORIGIN(DTCM) + LENGTH(DTCM) - __STACK_SIZE) (NOLOAD) : ALIGN(8)
   {
     __StackLimit = .;
@@ -219,13 +223,6 @@ SECTIONS
     *(EXCLUDE_FILE(*crtend?.o *crtend.o) .dtors)
     *(SORT(.dtors.*))
     *(.dtors)
-
-    . = ALIGN(8);
-    *(.ARM.extab* .gnu.linkonce.armextab.*)
-    . = ALIGN(8);
-    __exidx_start = .;
-    *(.ARM.exidx* .gnu.linkonce.armexidx.*)
-    __exidx_end = .;
 
     *(.text*)
     *(.rodata*)

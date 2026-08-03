@@ -21,48 +21,29 @@
 #include <stddef.h>
 #include <stdlib.h>
 #include <inttypes.h>
-#include "RTE_Components.h"
 
-#include "alif.h"
 #include "pinconf.h"
 #include "sys_utils.h"
 #include "drv_counter.h"
-#include "ospi_hyperram.h"
-#include "ospi_hyperram_xip.h"
+#include "ospi_psram.h"
+#include "ospi_psram_xip.h"
 #include "sys_ctrl_aes.h"
 #include "Driver_IO.h"
 
-#define OSPI_RESET_PORT                15
-extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
-static ARM_DRIVER_GPIO *GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
-
-#define DDR_DRIVE_EDGE 1
-#define RXDS_DELAY     8
-#define SIGNAL_DELAY   22
-#define OSPI_BUS_SPEED 100000000 /* 100MHz */
-#define OSPI_DFS       32
-
-#define OSPI_RESET_PIN  2
 #define OSPI_XIP_BASE   0xA0000000
 #define HRAM_SIZE_BYTES (64 * 1024 * 1024) /* 64MB */
 
-#define SLAVE_SELECT    0
-#define WAIT_CYCLES     6
+#include "board_config.h"
+#define OSPI_RESET_PORT BOARD_IS66_HYPERRAM_RESET_GPIO_PORT
+#define OSPI_RESET_PIN  BOARD_IS66_HYPERRAM_RESET_GPIO_PIN
+extern ARM_DRIVER_GPIO ARM_Driver_GPIO_(OSPI_RESET_PORT);
+static ARM_DRIVER_GPIO *GPIODrv = &ARM_Driver_GPIO_(OSPI_RESET_PORT);
 
 static uint32_t init_done;
-static const ospi_hyperram_xip_config issi_config = {
-    .instance       = OSPI_INSTANCE_0,
-    .bus_speed      = OSPI_BUS_SPEED,
-    .hyperram_init  = NULL, /* No special initialization needed by issi hyperram device */
-    .ddr_drive_edge = DDR_DRIVE_EDGE,
-    .rxds_delay     = RXDS_DELAY,
-#if SOC_FEAT_AES_OSPI_SIGNALS_DELAY
-    .signal_delay   = SIGNAL_DELAY,
-#endif
-    .wait_cycles    = WAIT_CYCLES,
-    .dfs            = OSPI_DFS,
-    .slave_select   = SLAVE_SELECT,
-    .spi_mode       = OSPI_SPI_MODE_OCTAL
+static ospi_psram_xip_config issi_config = {
+    .instance       = BOARD_PSRAM_OSPI_INSTANCE,
+    .ram_init       = NULL,
+    .ram_type       = RAM_TYPE_HYPERRAM
 };
 
 static int32_t issi_pinmux_setup(void)
@@ -172,7 +153,7 @@ static int32_t issi_pinmux_setup(void)
     return 0;
 }
 
-static int32_t hyperram_reset(void)
+static int32_t issi_reset(void)
 {
     int32_t ret;
 
@@ -201,7 +182,7 @@ static int32_t hyperram_reset(void)
         return -1;
     }
 
-    sys_busy_loop_us(30);
+    sys_busy_loop_us(150);
 
     ret = GPIODrv->SetValue(OSPI_RESET_PIN, GPIO_PIN_OUTPUT_STATE_HIGH);
     if (ret != ARM_DRIVER_OK) {
@@ -247,8 +228,8 @@ int ospi_hyperram_init(void)
 {
     if (init_done == 0) {
         issi_pinmux_setup();
-        hyperram_reset();
-        if (ospi_hyperram_xip_init(&issi_config))
+        issi_reset();
+        if (ospi_psram_xip_init(&issi_config))
         {
             printf("OSPI HyperRAM init failed\n\n");
             return -1;
