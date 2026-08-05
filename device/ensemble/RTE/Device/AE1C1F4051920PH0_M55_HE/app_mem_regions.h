@@ -15,11 +15,11 @@
 
 // <h>MRAM XIP Configuration
 // =======================
-//   <o> RTSS HE Base address <0x80000000-0x8018C000:8>
+//   <o> RTSS HE Base address <0x80000000-0x801CD000:8>
 //   <i> Defines base address of RTSS HE application memory region.
 //   <i> Default: 0x80000000
 #define APP_MRAM_HE_BASE       0x80000000
-//   <o> RTSS HE Region size [bytes] <0x0-0x0018C000:8>
+//   <o> RTSS HE Region size [bytes] <0x0-0x001CD000:8>
 //   <i> Defines size of RTSS HE application memory region.
 //   <i> Default: 0x0018C000
 #define APP_MRAM_HE_SIZE       0x001CD000
