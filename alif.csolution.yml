@@ -5,10 +5,11 @@ solution:
 
   # List of tested compilers that can be selected
   select-compiler:
+    - compiler: AC6
     - compiler: GCC
 
   # Select used compiler
-  compiler: GCC
+  compiler: AC6
 
   packs:
     - pack: AlifSemiconductor::Ensemble@2.2.0
@@ -82,7 +83,7 @@ solution:
       define:
         - _DEBUG
     - type: release
-      optimize: size
+      optimize: speed
       debug: on
 
   define:

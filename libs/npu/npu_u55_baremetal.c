@@ -30,12 +30,12 @@ extern size_t get_kws_qbase_offset(void);
 extern size_t get_kws_basep0_offset(void);
 extern const uint8_t kws_reference_input[];
 extern const uint8_t kws_reference_output[];
-static const uint8_t kws_model_tcm[157600] __attribute__((aligned(16), section(".bss.kws_model_tcm")));
+static uint8_t kws_model_tcm[157600] __attribute__((aligned(16), section(".bss.kws_model_tcm")));
 #if SOC_FEAT_HAS_BULK_SRAM
-static const uint8_t kws_model_sram[157600] __attribute__((aligned(16), section(".bss.kws_model_sram")));
+static uint8_t kws_model_sram[157600] __attribute__((aligned(16), section(".bss.kws_model_sram")));
 #endif
 #if __HAS_HYPER_RAM
-static const uint8_t kws_model_hram[157600] __attribute__((aligned(16), section(".bss.kws_model_hram")));
+static uint8_t kws_model_hram[157600] __attribute__((aligned(16), section(".bss.kws_model_hram")));
 #endif
 #endif
 
@@ -58,7 +58,7 @@ static const void *npu_readonly_addr;
 static const void *reference_data_addr;
 static uint32_t reference_data_size;
 // static void *npu_workspace_addr; /* NPU workspace always in DTCM */
-static uint32_t npu_workspace_addr[32768] __attribute__((aligned(16), section(".bss.noinit")));
+static uint32_t npu_workspace_addr[32768] __attribute__((aligned(16), section(".bss.kws_workspace_tcm")));
 static uint32_t npu_workspace_size;
 static uint32_t npu_output_offset;
 static uint32_t npu_register_QBASE_offset;

@@ -4,7 +4,10 @@ tmp/
 *.cbuild-run.yml
 *.cbuild.yml
 *.clangd
+.clang-format
 cmsis.json
+linker_ac6_*
+!linker_ac6_mram*
 settings.json
 tools-environment.yml
 RTE_Components.h

@@ -14,12 +14,22 @@ project:
     - group: Coremark
       files:
         - file: ../libs/coremark/core_list_join.c
+          misc: &coremark_omax
+            - for-compiler: AC6
+              C:
+                - -Omax
         - file: ../libs/coremark/core_main.c
+          misc: *coremark_omax
         - file: ../libs/coremark/core_matrix.c
+          misc: *coremark_omax
         - file: ../libs/coremark/core_state.c
+          misc: *coremark_omax
         - file: ../libs/coremark/core_util.c
+          misc: *coremark_omax
         - file: ../libs/coremark/barebones/core_portme.c
+          misc: *coremark_omax
         - file: ../libs/coremark/barebones/cvt.c
+          misc: *coremark_omax
     - group: Drivers
       files:
         - file: ../libs/drv/debug_clks.c
@@ -70,6 +80,13 @@ project:
     - ../libs/coremark/barebones
     - ../libs/drv
     - ../libs/npu
+
+  # Coremark files are compiled with -Omax (bitcode); armlink must run LTO on them
+  misc:
+    - for-compiler: AC6
+      Link:
+        - --lto
+        - --lto_level=Omax
 
   output:
     base-name: $Project$

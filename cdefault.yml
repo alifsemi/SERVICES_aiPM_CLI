@@ -36,6 +36,7 @@ default:
       Link:
         - --entry=Reset_Handler
         - --map
+        - --list=$OutDir()$/$Project$.map
         - --verbose
         - --info=sizes,totals,unused,summarysizes
         - --diag_suppress=L6312W,L6314W

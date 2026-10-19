@@ -31,9 +31,9 @@ extern size_t get_kws_u85_basep0_offset(void);
 extern const uint8_t kws_reference_input[];
 extern const uint8_t kws_reference_output[];
 #if __HAS_HYPER_RAM
-static const uint8_t kws_model_hram[157600] __attribute__((aligned(16), section(".bss.kws_model_hram")));
+static uint8_t kws_model_hram[157600] __attribute__((aligned(16), section(".bss.kws_model_hram")));
 #endif
-static const uint8_t kws_model_sram[157600] __attribute__((aligned(16), section(".bss.kws_model_sram")));
+static uint8_t kws_model_sram[157600] __attribute__((aligned(16), section(".bss.kws_model_sram")));
 #endif
 
 #define NPU_BASE_ADDRESS                0x49042000

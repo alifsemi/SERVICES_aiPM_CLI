@@ -598,7 +598,7 @@ int main (void)
             case 1:
 #if COREMARK_ENABLED == 1
                 /* ten seconds of Coremark */
-                seed4_volatile = 0.000031 * SystemCoreClock;
+                seed4_volatile = 0.000045 * SystemCoreClock;
                 coremark_main();
                 printf("\r\n");
 #endif
