@@ -9,7 +9,11 @@
 static const char star_char = '*';
 static const char star_bar[]      = "*************************************************************";
 static const char star_domains[]  = "* PD0 * PD1 * PD2 * PD3 * PD4 * PD5 * PD6 * PD7 * PD8 * PD9 *";
-static const char star_memories[] = "* SRAM0 * SRAM1 * HETCM1 * HETCM2 * MRAM * SERAM * BKUP4K * MASK     *";
+#if SOC_FEAT_HAS_BULK_SRAM
+static const char star_memories[] = "* SRAM0 * SRAM1 * HETCM1 * HETCM2 * MRAM * SERAM * BKUP4K *";
+#else
+static const char star_memories[] = "* RET_A1 * RET_A2 * RET_B * RET_C * RET_D * RET_E * MRAM * SERAM * BKUP4K *";
+#endif
 static const char star_clocks[]   = "* AON CLK * RUN CLK * SCALED CLK FREQ    * CPU FREQ *";
 static const char star_dcdc[]     = "* DCDC      * Mode *";
 static const char star_wake[]     = "* VBAT    * SE EWIC * VTOR       *";
@@ -53,7 +57,7 @@ static const char * str_user_submenu[] = {
   " 1: M55: Coremark 10s\r\n 2: M55: while(1) 10s\r\n 3: M55: light sleep 10s\r\n 4: M55: deep sleep 10s\r\n 5: M55 subsystem off\r\n 6: NVIC_SystemReset()\r\n 7: WAKE other core via MHU",
   " 1: U55: Typical 10s\r\n 2: U85: Typical 10s\r\n 3: U55: MicroNet Medium 100 iterations (DTCM)\r\n 4: U55: MicroNet Medium 100 iterations (SRAM)\r\n 5: U55: MicroNet Medium 100 iterations (MRAM)\r\n 6: U55: MicroNet Medium 100 iterations (HyperRAM)\r\n 7: U85: MicroNet Medium 100 iterations (SRAM)\r\n 8: U85: MicroNet Medium 100 iterations (MRAM)\r\n 9: U85: MicroNet Medium 100 iterations (HyperRAM)",
   " 1: boot_process_toc_entry()\r\n 2: boot_cpu()\r\n 3: boot_reset_cpu()\r\n 4: boot_release_cpu()\r\n 5: boot_reset_soc()",
-  " 1: SE Clock Source to HFRC\r\n 2: SE Subsystem Off Request\r\n 3: MCU Stop Mode Request via SE"
+  " 1: SE Clock Source to HFRC\r\n 2: SE Clock Source to PLL\r\n 3: SE Subsystem Off Request\r\n 4: MCU Stop Mode Request via SE"
 };
 
 static const char * str_cfg_main_menu[] = {
@@ -116,7 +120,6 @@ static void print_cfg_memory_blocks(uint32_t mb_status_mask)
         printf("%s  ", str_pd_stat[0]);
     }
     printf("%c", star_char);
-#endif
     if ((SRAM4_1_MASK|SRAM5_1_MASK) & mb_status_mask) {
         printf("%s   ", str_pd_stat[1]);
     }
@@ -130,6 +133,49 @@ static void print_cfg_memory_blocks(uint32_t mb_status_mask)
     else {
         printf("%s   ", str_pd_stat[0]);
     }
+#else
+    if (SRAM4_1_MASK & mb_status_mask) {
+        printf("%s   ", str_pd_stat[1]);
+    }
+    else {
+        printf("%s   ", str_pd_stat[0]);
+    }
+    printf("%c", star_char);
+    if (SRAM5_1_MASK & mb_status_mask) {
+        printf("%s   ", str_pd_stat[1]);
+    }
+    else {
+        printf("%s   ", str_pd_stat[0]);
+    }
+    printf("%c", star_char);
+    if ((SRAM4_2_MASK | SRAM5_2_MASK) & mb_status_mask) {
+        printf("%s  ", str_pd_stat[1]);
+    }
+    else {
+        printf("%s  ", str_pd_stat[0]);
+    }
+    printf("%c", star_char);
+    if ((SRAM4_3_MASK | SRAM5_3_MASK) & mb_status_mask) {
+        printf("%s  ", str_pd_stat[1]);
+    }
+    else {
+        printf("%s  ", str_pd_stat[0]);
+    }
+    printf("%c", star_char);
+    if ((SRAM4_4_MASK | SRAM5_4_MASK) & mb_status_mask) {
+        printf("%s  ", str_pd_stat[1]);
+    }
+    else {
+        printf("%s  ", str_pd_stat[0]);
+    }
+    printf("%c", star_char);
+    if (SRAM5_5_MASK & mb_status_mask) {
+        printf("%s  ", str_pd_stat[1]);
+    }
+    else {
+        printf("%s  ", str_pd_stat[0]);
+    }
+#endif
     printf("%c", star_char);
     if (MRAM_MASK & mb_status_mask) {
         printf("%s ", str_pd_stat[1]);
@@ -151,8 +197,6 @@ static void print_cfg_memory_blocks(uint32_t mb_status_mask)
     else {
         printf("%s   ", str_pd_stat[0]);
     }
-    printf("%c", star_char);
-    printf(" 0x%06X ", mb_status_mask);
     printf("%c\r\n", star_char);
 }
 
@@ -440,7 +484,7 @@ void print_dialog_configure_amux()
     }
     printf("%c\r\n\n", ret);
 
-    uint32_t amux_index = (ret - '0') - 1;
+    uint32_t amux_index = (ret - '1');
     const uint32_t amux_array[] = {0x80,0x87,0xA0,0xA7,0xC0,0xD0,0xD1,0xD2,0xD3};
 
     *(volatile uint32_t *)(0x49020038) = amux_array[amux_index] << 24;

@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <string.h>
+#include <inttypes.h>
 #include <se_services_port.h>
 
 #include "SERVICES_aiPM_print.h"
@@ -47,8 +48,8 @@ void print_se_startup_info()
     }
 
     printf("ALIF_PN: %.16s\t", device_info.ALIF_PN);
-    printf("Revision: %X\t", device_info.revision_id);
-    printf("LCS=%u\r\n\n", device_info.LCS);
+    printf("Revision: %" PRIX32 "\t", device_info.revision_id);
+    printf("LCS=%" PRIu8 "\r\n\n", device_info.LCS);
 
         /* Bolt B4 */
     if (!((device_info.revision_id == 0xB400) ||
@@ -63,7 +64,7 @@ void print_se_startup_info()
         /* Eagle engr samples */
     (device_info.revision_id == 0x02A1))) {
         /* device not supported */
-        printf("Application stopping, device revision %X is not supported.\r\n\n", device_info.revision_id);
+        printf("Application stopping, device revision %" PRIX32 " is not supported.\r\n\n", device_info.revision_id);
         while(1);
     }
 
@@ -81,7 +82,7 @@ void print_se_startup_info()
     {
         SERVICES_toc_info_t *toc_entry = &toc_data.toc_entry[toc_entry_num];
         if (toc_entry->cpu < TOC_NAME_COUNT) {
-            printf("Entry %d: %s on %s (CPU %d)\r\n", toc_entry_num, toc_entry->image_identifier, str_cpu_names[toc_entry->cpu], toc_entry->cpu);
+            printf("Entry %d: %.8s on %.8s (CPU %" PRIu32 ")\r\n", toc_entry_num, toc_entry->image_identifier, str_cpu_names[toc_entry->cpu], toc_entry->cpu);
 #if USE_HARD_TOC_NAMES == 0
             strncpy(toc_names[toc_entry->cpu], (const char *)toc_entry->image_identifier, TOC_NAME_LENGTH);
 #endif
@@ -165,10 +166,10 @@ void SERVICES_boot_testing(int32_t boot_selection, int32_t cpu_selection)
 
 void SERVICES_ret(uint32_t ret)
 {
-    printf("\r\n\nSERVICES function ret = %u\r\n\n", ret);
+    printf("\r\n\nSERVICES function ret = %" PRIu32 "\r\n\n", ret);
 }
 
 void SERVICES_response(uint32_t response)
 {
-    printf("\r\n\nSERVICES function response = %u\r\n\n", response);
+    printf("\r\n\nSERVICES function response = %" PRIu32 "\r\n\n", response);
 }

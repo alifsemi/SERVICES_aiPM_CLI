@@ -67,8 +67,6 @@ SECTIONS
     *tgu*(.text* .rodata*)
     *sau_tcm_ns_setup*(.text* .rodata*)
 
-    *lv_*(.text* .rodata*)
-
     . = ALIGN(16);
   } > MRAM
 
@@ -108,10 +106,8 @@ SECTIONS
   .data.at_dtcm : ALIGN(8)
   {
     *(vtable)
-    *(.data)
     *(.data*)
-    *(.typical_mem_map)
-    *arm_common_tables*(.data* .rodata*)
+    *(.typical_mem_map*)
 
     KEEP(*(.jcr*))
     . = ALIGN(16);
@@ -128,38 +124,36 @@ SECTIONS
 
   .bss.sram0_noinit (NOLOAD) : ALIGN(8)
   {
-    *(.bss.kws_workspace_sram)
+    *(.bss.kws_workspace_sram*)
   } > SRAM0
 
   .bss.sram1_noinit (NOLOAD) : ALIGN(8)
   {
-    *(.bss.kws_model_sram)
+    *(.bss.kws_model_sram*)
   } > SRAM1
   #endif
 
   #if __HAS_HYPER_RAM
   .bss.hram_noinit (NOLOAD) : ALIGN(8)
   {
-    *(.bss.kws_model_hram)
+    *(.bss.kws_model_hram*)
   } > HRAM
   #endif
 
   .bss.itcm_noinit (NOLOAD) : ALIGN(8)
   {
-    *(.bss.kws_model_tcm)
+    *(.bss.kws_model_tcm*)
   } > ITCM
 
   .bss.dtcm_noinit (NOLOAD) : ALIGN(8)
   {
-    *(.bss.noinit)
-    *(.bss.noinit.*)
+    *(.bss.noinit*)
   } > DTCM
 
   .bss (NOLOAD) : ALIGN(8)
   {
     __bss_start__ = .;
-    *(.bss)
-    *(.bss.*)
+    *(.bss*)
     *(COMMON)
 
     . = ALIGN(8);

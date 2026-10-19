@@ -6,4 +6,5 @@ tmp/
 *.clangd
 cmsis.json
 settings.json
+tools-environment.yml
 RTE_Components.h

@@ -5,16 +5,13 @@ default:
       C:
         - -std=c99
         - -fdata-sections
+        - -ffunction-sections
 
       Link:
         - --specs=nosys.specs
         - --entry=Reset_Handler
         - -Wl,-Map=linker.map,--cref,-print-memory-usage,--gc-sections,--no-warn-rwx-segments
-        # generate linker map
-        # output a cross reference table
-        # print memory usage to console
-        # exclude unused sections from the iamge
-        # suppress executable write segment warnings (used for ITCM)
+
       Library:
         - -lm -lc -lgcc
 
@@ -34,7 +31,8 @@ default:
       C:
         - -std=c99
         - -fdata-sections
-        - -Wno-license-management
+        - -ffunction-sections
+
       Link:
         - --entry=Reset_Handler
         - --map

@@ -1,7 +1,4 @@
-#include <math.h>
 #include <stdio.h>
-#include <string.h>
-#include <inttypes.h>
 
 #include <alif.h>
 #include <RTE_Components.h>
@@ -15,12 +12,6 @@
 #if defined(RTE_CMSIS_Compiler_STDIN_Custom) || defined(RTE_CMSIS_Compiler_STDOUT_Custom)
 #include <retarget_init.h>
 #include <retarget_config.h>
-#if defined(RTE_CMSIS_Compiler_STDIN_Custom)
-#include <retarget_stdin.h>
-#endif
-#if defined(RTE_CMSIS_Compiler_STDOUT_Custom)
-#include <retarget_stdout.h>
-#endif
 #endif
 
 #define COREMARK_ENABLED    1
@@ -222,7 +213,18 @@ int main (void)
         runp.dcdc_voltage = 825;
         runp.power_domains = PD6_MASK;// | PD8_MASK;
         runp.memory_blocks = MRAM_MASK | BACKUP4K_MASK;
+#if SOC_FEAT_HAS_BULK_SRAM
         // runp.memory_blocks |= SRAM0_MASK | SRAM1_MASK;
+#endif
+#if defined(ENSEMBLE_SOC_GEN2)
+        // runp.memory_blocks |= SRAM0_RET_MASK | SRAM1_RET_MASK;
+#endif
+#if defined(M55_HE)
+        // runp.memory_blocks |= SRAM4_1_MASK | SRAM4_2_MASK | SRAM5_1_MASK | SRAM5_2_MASK;
+#endif
+#if defined(M55_HE_E1C)
+        // runp.memory_blocks |= SRAM4_4_MASK | SRAM5_5_MASK;
+#endif
         runp.vdd_ioflex_3V3 = IOFLEX_LEVEL_1V8;
         runp.scaled_clk_freq = SCALED_FREQ_RC_STDBY_0_6_MHZ;
 
@@ -238,24 +240,30 @@ int main (void)
         reconfigure_uart();
         refclk_cntr_update();
 #if !defined(ENSEMBLE_SOC_E1C)
-        HOSTBASE->BSYS_PWR_REQ = 0;
+        HOSTBASE->BSYS_PWR_REQ = 2;
 #endif
 
-        // ret = SERVICES_get_off_cfg(se_services_s_handle, &offp, &service_response);
-        // if (ret != 0) {
-        //     SERVICES_ret(ret);
-        // }
-        // if (service_response != 0) {
-        //     SERVICES_response(service_response);
-        // }
+        ret = SERVICES_get_off_cfg(se_services_s_handle, &offp, &service_response);
+        if (ret != 0) {
+            SERVICES_ret(ret);
+        }
+        if (service_response != 0) {
+            SERVICES_response(service_response);
+        }
 
         /* setting some memories to retain by default */
-        offp.memory_blocks = MRAM_MASK | SERAM_MASK | BACKUP4K_MASK;
+        offp.memory_blocks = MRAM_MASK | BACKUP4K_MASK;
+#if SOC_FEAT_HAS_BULK_SRAM
+        // offp.memory_blocks |= SRAM0_MASK | SRAM1_MASK;
+#endif
+#if defined(ENSEMBLE_SOC_GEN2)
+        // offp.memory_blocks |= SRAM0_RET_MASK | SRAM1_RET_MASK;
+#endif
 #if defined(M55_HE)
-        offp.memory_blocks |= SRAM4_1_MASK | SRAM4_2_MASK | SRAM5_1_MASK | SRAM5_2_MASK;
+        // offp.memory_blocks |= SRAM4_1_MASK | SRAM4_2_MASK | SRAM5_1_MASK | SRAM5_2_MASK;
 #endif
 #if defined(M55_HE_E1C)
-        offp.memory_blocks |= SRAM4_4_MASK | SRAM5_5_MASK;
+        // offp.memory_blocks |= SRAM4_4_MASK | SRAM5_5_MASK;
 #endif
         offp.stby_clk_src = CLK_SRC_HFRC;
         offp.stby_clk_freq = SCALED_FREQ_RC_STDBY_0_6_MHZ;
@@ -267,13 +275,13 @@ int main (void)
         offp.vdd_ioflex_3V3 = IOFLEX_LEVEL_1V8;
         offp.vtor_address = SCB->VTOR;
 
-        // ret = SERVICES_set_off_cfg(se_services_s_handle, &offp, &service_response);
-        // if (ret != 0) {
-        //     SERVICES_ret(ret);
-        // }
-        // if (service_response != 0) {
-        //     SERVICES_response(service_response);
-        // }
+        ret = SERVICES_set_off_cfg(se_services_s_handle, &offp, &service_response);
+        if (ret != 0) {
+            SERVICES_ret(ret);
+        }
+        if (service_response != 0) {
+            SERVICES_response(service_response);
+        }
 
         ret = SERVICES_get_run_cfg(se_services_s_handle, &tmp_runp, &service_response);
         if (ret != 0) {
@@ -283,19 +291,19 @@ int main (void)
             SERVICES_response(service_response);
         }
 
-        // ret = SERVICES_get_off_cfg(se_services_s_handle, &tmp_offp, &service_response);
-        // if (ret != 0) {
-        //     SERVICES_ret(ret);
-        // }
-        // if (service_response != 0) {
-        //     SERVICES_response(service_response);
-        // }
+        ret = SERVICES_get_off_cfg(se_services_s_handle, &tmp_offp, &service_response);
+        if (ret != 0) {
+            SERVICES_ret(ret);
+        }
+        if (service_response != 0) {
+            SERVICES_response(service_response);
+        }
 
-        // /* print the run config and off config after this application has made changes */
+        /* print the run config and off config after this application has made changes */
         printf("aiPM Run Config after Configuration:\r\n");
         print_run_cfg(&tmp_runp);
-        // printf("aiPM Off Config after Configuration:\r\n");
-        // print_off_cfg(&tmp_offp);
+        printf("aiPM Off Config after Configuration:\r\n");
+        print_off_cfg(&tmp_offp);
     }
 
     int32_t user_choice, user_subchoice, cfg_choice, cfg_param;
@@ -590,7 +598,7 @@ int main (void)
             case 1:
 #if COREMARK_ENABLED == 1
                 /* ten seconds of Coremark */
-                seed4_volatile = roundf(0.000031 * SystemCoreClock);
+                seed4_volatile = 0.000031 * SystemCoreClock;
                 coremark_main();
                 printf("\r\n");
 #endif
@@ -658,9 +666,9 @@ int main (void)
             case 1:
                 /* ten seconds of Ethos "Typical" Test Case */
 #if defined(M55_HP)
-                npuTestStartU55(roundf(0.00092 * SystemCoreClock), 0);
+                npuTestStartU55(0.00092 * SystemCoreClock, 0);
 #elif defined(M55_HE)
-                npuTestStartU55(roundf(0.00050 * SystemCoreClock), 0);
+                npuTestStartU55(0.00050 * SystemCoreClock, 0);
 #endif
                 break;
 
@@ -669,7 +677,7 @@ int main (void)
                 /* ten seconds of Ethos "Typical" Test Case */
                 SystBusClkUpdate();
                 enable_syst_sram(SYST_SRAM0);
-                npuTestStartU85(roundf(0.00041 * SystemAXIClock), 0);
+                npuTestStartU85(0.00041 * SystemAXIClock, 0);
                 enable_syst_sram(0);
 #else
                 printf("Feature not implemented on this device\r\n\n");
@@ -772,7 +780,8 @@ int main (void)
                 break;
 
             case 2:
-                ret = SERVICES_power_se_sleep_req(se_services_s_handle, 0, &service_response);
+                CGU->CLK_ENA |= 1U << 8;
+                ret = SERVICES_clocks_select_pll_source(se_services_s_handle, PLL_SOURCE_PLL, PLL_TARGET_SECENC, &service_response);
                 if (ret != 0) {
                     SERVICES_ret(ret);
                 }
@@ -782,6 +791,16 @@ int main (void)
                 break;
 
             case 3:
+                ret = SERVICES_power_se_sleep_req(se_services_s_handle, 0, &service_response);
+                if (ret != 0) {
+                    SERVICES_ret(ret);
+                }
+                if (service_response != 0) {
+                    SERVICES_response(service_response);
+                }
+                break;
+
+            case 4:
 #if defined(M55_HE)
                 lptimer_init();
 #endif

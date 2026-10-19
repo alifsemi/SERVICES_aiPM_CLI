@@ -71,10 +71,6 @@ project:
     - ../libs/drv
     - ../libs/npu
 
-  # TCM-only build is not supported, selecting the MRAM XIP linker script below
-  linker:
-    - script: "../device/ensemble/RTE/Device/$Dname$_$Pname$/linker_gnu_mram.ld.src"
-
   output:
     base-name: $Project$
     type:
