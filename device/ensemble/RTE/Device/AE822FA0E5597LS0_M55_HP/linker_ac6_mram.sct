@@ -77,10 +77,10 @@ LR_ROM __ROM_BASE __ROM_SIZE {
   ARM_LIB_STACK __STACK_TOP EMPTY -__STACK_SIZE {}
 
 #if __HAS_BULK_SRAM
-  SRAM0_NOINIT (AlignExpr(+0, 16)) UNINIT {
+  SRAM0_NOINIT APP_SRAM0_BASE UNINIT APP_SRAM0_SIZE {
     *(.bss.kws_workspace_sram*)
   }
-  SRAM1_NOINIT (AlignExpr(+0, 16)) UNINIT {
+  SRAM1_NOINIT APP_SRAM1_BASE UNINIT APP_SRAM1_SIZE {
     *(.bss.kws_model_sram*)
   }
 #endif
